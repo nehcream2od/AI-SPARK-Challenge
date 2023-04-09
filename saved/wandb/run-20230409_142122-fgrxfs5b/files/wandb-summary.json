@@ -1,0 +1,1 @@
+{"val_discriminator_loss": 2.5210864543914795, "val_generator_loss": 0.3817611038684845, "epoch": 13, "trainer/global_step": 41, "_timestamp": 1681018054.4510489, "_runtime": 371.99992394447327, "_step": 27, "train_generator_loss_epoch": 0.4576684832572937, "train_discriminator_loss_epoch": 1.2161952257156372, "_wandb": {"runtime": 394}}

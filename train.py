@@ -50,14 +50,14 @@ def main(config):
         input_size = train_loader.dataset[0].shape[0]
         output_size = input_size
 
+        # add
+        config["arch"]["args"]["input_size"] = input_size
+        config["arch"]["args"]["output_size"] = output_size
+
         # build model architecture
         model = config.init_obj(
             "arch",
             module_arch,
-            input_size,
-            output_size,
-            # config["arch"]["args"]["gen_hidden_size"],
-            # config["arch"]["args"]["dsc_hidden_size"],
         )
 
         # prepare for (multi-device) GPU training
@@ -76,6 +76,7 @@ def main(config):
                 config=config,
                 save_dir=config["trainer"]["save_dir"],
             ),
+            log_every_n_steps=1,
         )
         lit_gan_trainer = LitGANTrainer(
             model=model,
@@ -91,7 +92,7 @@ def main(config):
         )
 
         # (Optional) Save fold-specific model checkpoint
-        checkpoint_path = f"{config['save_dir']}/fold_{fold}.ckpt"
+        checkpoint_path = f"{config['trainer']['save_dir']}/fold_{fold}.ckpt"
         trainer.save_checkpoint(checkpoint_path)
 
         # Evaluate the model on the validation set

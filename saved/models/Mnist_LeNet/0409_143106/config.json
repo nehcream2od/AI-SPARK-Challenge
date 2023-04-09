@@ -19,7 +19,7 @@
         "type": "CustomDataModule",
         "args": {
             "data_dir": "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/data",
-            "batch_size": 32,
+            "batch_size": 128,
             "shuffle": true,
             "num_workers": 8,
             "prepare_data_per_node": false,

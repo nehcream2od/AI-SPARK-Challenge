@@ -19,107 +19,90 @@ class LitGANTrainer(BaseLitModule):
         self.criterion_disc = criterion_disc
         self.config = config
         self.alpha = alpha
+        self.automatic_optimization = False
 
     def forward(self, x):
         return self.generator(x)
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def training_step(self, batch, batch_idx):
+        inputs = batch
+        batch_size = inputs.shape[0]
+
+        optimizer_g, optimizer_d = self.optimizers()
+
+        # Train generator
+        self.toggle_optimizer(optimizer_g, 0)
+        generated_inputs = self.generator(inputs)
+        valid = torch.ones(batch_size, 1, device=self.device)
+
+        g_loss = self.criterion_gen(
+            generated_inputs, inputs
+        ) * self.alpha + self.criterion_disc(
+            self.discriminator(generated_inputs), valid
+        ) * (
+            1 - self.alpha
+        )
+
+        self.log(
+            "train_generator_loss", g_loss, on_step=True, on_epoch=True, prog_bar=True
+        )
+        self.manual_backward(g_loss)
+        optimizer_g.step()
+        optimizer_g.zero_grad()
+        self.untoggle_optimizer(optimizer_g)
+
+        # Train discriminator
+        self.toggle_optimizer(optimizer_d, 1)
+        valid = torch.ones(batch_size, 1, device=self.device)
+        real_loss = self.criterion_disc(self.discriminator(inputs), valid)
+        fake = torch.zeros(batch_size, 1, device=self.device)
+        fake_loss = self.criterion_disc(
+            self.discriminator(generated_inputs.detach()), fake
+        )
+
+        d_loss = (real_loss + fake_loss) / 2
+        self.log(
+            "train_discriminator_loss",
+            d_loss,
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+        self.manual_backward(d_loss)
+        optimizer_d.step()
+        optimizer_d.zero_grad()
+        self.untoggle_optimizer(optimizer_d)
+
+    def validation_step(self, batch, batch_idx):
         inputs = batch
         batch_size = inputs.size(0)
 
-        # Train the discriminator
-        if optimizer_idx == 1:
-            optimizer_D = self.optimizers()[1]
-            optimizer_D.zero_grad()
-
-            # Train on real data
-            real_output = self.discriminator(inputs)
-            real_label = torch.ones(batch_size, 1, device=self.device)
-            real_loss = self.criterion_disc(real_output, real_label)
-            self.log("discriminator_real_loss", real_loss)
-
-            # Train on fake data
-            fake_inputs = self.generator(inputs)
-            fake_output = self.discriminator(fake_inputs.detach())
-            fake_label = torch.zeros(batch_size, 1, device=self.device)
-            fake_loss = self.criterion_disc(fake_output, fake_label)
-            self.log("discriminator_fake_loss", fake_loss)
-
-            # Update the discriminator
-            disc_loss = real_loss + fake_loss
-            self.log("discriminator_loss", disc_loss)
-            disc_loss.backward()
-            optimizer_D.step()
-
-            return {"loss": disc_loss}
-
-        # Train the generator
-        if optimizer_idx == 0:
-            optimizer_G = self.optimizers()[0]
-            optimizer_G.zero_grad()
-
-            # Use the existing fake_inputs
-            fake_inputs = self.generator(inputs)
-            fake_output = self.discriminator(fake_inputs)
-
-            # Update the generator
-            real_label = torch.ones(
-                batch_size, 1, device=self.device
-            )  # Assign new real_label
-            gen_loss = self.criterion_gen(
-                fake_inputs, inputs
-            ) * self.alpha + self.criterion_disc(fake_output, real_label) * (
-                1 - self.alpha
-            )
-            self.log("generator_loss", gen_loss)
-            gen_loss.backward()
-            optimizer_G.step()
-
-            return {"loss": gen_loss}
-
-    def validation_step(self, batch, batch_idx):
         with torch.no_grad():
-            self.generator.eval()
-            self.discriminator.eval()
-
-            inputs = batch
-            batch_size = inputs.size(0)
-
-            # Calculate losses for the discriminator
             real_output = self.discriminator(inputs)
-            real_label = torch.ones(batch_size, 1, device=self.device)
-            real_loss = self.criterion_disc(real_output, real_label)
+            valid = torch.ones(batch_size, 1, device=self.device)
+            real_loss = self.criterion_disc(real_output, valid)
 
-            fake_inputs = self.generator(inputs)
-            fake_output = self.discriminator(fake_inputs)
-            fake_label = torch.zeros(batch_size, 1, device=self.device)
-            fake_loss = self.criterion_disc(fake_output, fake_label)
+            generated_inputs = self.generator(inputs)
+            fake_output = self.discriminator(generated_inputs)
+            fake = torch.zeros(batch_size, 1, device=self.device)
+            fake_loss = self.criterion_disc(fake_output, fake)
 
             disc_loss = real_loss + fake_loss
-            self.log(
-                "val_discriminator_loss",
-                disc_loss,
-                on_step=False,
-                on_epoch=True,
-                prog_bar=True,
-            )
 
-            # Calculate loss for the generator
             gen_loss = self.criterion_gen(
-                fake_inputs, inputs
-            ) * self.alpha + self.criterion_disc(fake_output, real_label) * (
-                1 - self.alpha
-            )
-            self.log(
-                "val_generator_loss",
-                gen_loss,
-                on_step=False,
-                on_epoch=True,
-                prog_bar=True,
-            )
+                generated_inputs, inputs
+            ) * self.alpha + self.criterion_disc(fake_output, valid) * (1 - self.alpha)
+
+        return {"val_discriminator_loss": disc_loss, "val_generator_loss": gen_loss}
 
     def validation_epoch_end(self, outputs):
-        pass
+        avg_disc_loss = torch.stack(
+            [x["val_discriminator_loss"] for x in outputs]
+        ).mean()
+        avg_gen_loss = torch.stack([x["val_generator_loss"] for x in outputs]).mean()
+
+        self.log("val_discriminator_loss", avg_disc_loss, on_epoch=True, prog_bar=True)
+        self.log("val_generator_loss", avg_gen_loss, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
         if self.config["gen_optimizer"]["type"] == "Lion":

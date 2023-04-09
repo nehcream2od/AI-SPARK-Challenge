@@ -1,0 +1,170 @@
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+  | Name          | Type          | Params
+------------------------------------------------
+0 | generator     | Generator     | 575
+1 | discriminator | Discriminator | 89
+------------------------------------------------
+664       Trainable params
+0         Non-trainable params
+664       Total params
+0.003     Total estimated model params size (MB)
+Sanity Checking: 0it [00:00, ?it/s]
+/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py:1609: PossibleUserWarning: The number of training batches (3) is smaller than the logging interval Trainer(log_every_n_steps=50). Set a lower value for log_every_n_steps if you want to see logs for the training epoch.
+
+
+Epoch 0:  75%|███████████████████████████         | 3/4 [00:03<00:01,  1.30s/it, v_num=fs5b, train_generator_loss_step=1.890, train_discriminator_loss_step=0.843]
+
+
+Epoch 1:  75%|▊| 3/4 [00:18<00:06,  6.24s/it, v_num=fs5b, train_generator_loss_step=1.410, train_discriminator_loss_step=0.904, val_discriminator_loss=1.490, val_
+
+
+Epoch 2:  75%|▊| 3/4 [00:18<00:06,  6.21s/it, v_num=fs5b, train_generator_loss_step=1.250, train_discriminator_loss_step=0.960, val_discriminator_loss=1.600, val_
+
+
+Epoch 3:  75%|▊| 3/4 [00:18<00:06,  6.32s/it, v_num=fs5b, train_generator_loss_step=1.050, train_discriminator_loss_step=1.120, val_discriminator_loss=1.870, val_
+
+
+Epoch 4:  75%|▊| 3/4 [00:18<00:06,  6.27s/it, v_num=fs5b, train_generator_loss_step=0.888, train_discriminator_loss_step=1.180, val_discriminator_loss=2.220, val_
+
+
+Epoch 5:  75%|▊| 3/4 [00:18<00:06,  6.25s/it, v_num=fs5b, train_generator_loss_step=0.790, train_discriminator_loss_step=1.270, val_discriminator_loss=2.430, val_
+
+
+Epoch 6:  75%|▊| 3/4 [00:18<00:06,  6.27s/it, v_num=fs5b, train_generator_loss_step=0.715, train_discriminator_loss_step=1.300, val_discriminator_loss=2.670, val_
+
+
+Epoch 7:  75%|▊| 3/4 [00:18<00:06,  6.28s/it, v_num=fs5b, train_generator_loss_step=0.719, train_discriminator_loss_step=1.300, val_discriminator_loss=2.780, val_
+
+
+Epoch 8:  75%|▊| 3/4 [00:18<00:06,  6.26s/it, v_num=fs5b, train_generator_loss_step=0.642, train_discriminator_loss_step=1.280, val_discriminator_loss=2.760, val_
+
+
+Epoch 9:  75%|▊| 3/4 [00:18<00:06,  6.21s/it, v_num=fs5b, train_generator_loss_step=0.594, train_discriminator_loss_step=1.270, val_discriminator_loss=2.690, val_
+
+
+Epoch 10:  75%|▊| 3/4 [00:18<00:06,  6.18s/it, v_num=fs5b, train_generator_loss_step=0.571, train_discriminator_loss_step=1.230, val_discriminator_loss=2.620, val
+
+
+Epoch 11:  75%|▊| 3/4 [00:18<00:06,  6.18s/it, v_num=fs5b, train_generator_loss_step=0.512, train_discriminator_loss_step=1.250, val_discriminator_loss=2.580, val
+
+
+Epoch 12:  75%|▊| 3/4 [00:19<00:06,  6.46s/it, v_num=fs5b, train_generator_loss_step=0.437, train_discriminator_loss_step=1.220, val_discriminator_loss=2.540, val
+
+
+Epoch 13:  75%|▊| 3/4 [00:18<00:06,  6.30s/it, v_num=fs5b, train_generator_loss_step=0.462, train_discriminator_loss_step=1.220, val_discriminator_loss=2.530, val
+
+
+Epoch 14:  75%|▊| 3/4 [00:19<00:06,  6.48s/it, v_num=fs5b, train_generator_loss_step=0.422, train_discriminator_loss_step=1.170, val_discriminator_loss=2.520, val
+Exception ignored in: <function _MultiProcessingDataLoaderIter.__del__ at 0x13f5e0f70>
+Traceback (most recent call last):
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1510, in __del__
+    self._shutdown_workers()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1474, in _shutdown_workers
+    w.join(timeout=_utils.MP_STATUS_CHECK_INTERVAL)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/process.py", line 149, in join
+    res = self._popen.wait(timeout)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/popen_fork.py", line 40, in wait
+    if not wait([self.sentinel], timeout):
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/connection.py", line 931, in wait
+    ready = selector.select(timeout)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt:
+Traceback (most recent call last):
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1214, in _run_train
+    self.fit_loop.run()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/fit_loop.py", line 267, in advance
+    self._outputs = self.epoch_loop.run(self._data_fetcher)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/loop.py", line 200, in run
+    self.on_advance_end()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/epoch/training_epoch_loop.py", line 250, in on_advance_end
+    self._run_validation()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/epoch/training_epoch_loop.py", line 308, in _run_validation
+    self.val_loop.run()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/dataloader/evaluation_loop.py", line 152, in advance
+    dl_outputs = self.epoch_loop.run(self._data_fetcher, dl_max_batches, kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 121, in advance
+    batch = next(data_fetcher)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/utilities/fetching.py", line 184, in __next__
+    return self.fetching_function()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/utilities/fetching.py", line 265, in fetching_function
+    self._fetch_next_batch(self.dataloader_iter)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/utilities/fetching.py", line 280, in _fetch_next_batch
+    batch = next(iterator)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 681, in __next__
+    data = self._next_data()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1359, in _next_data
+    idx, data = self._get_data()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1325, in _get_data
+    success, data = self._try_get_data()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1163, in _try_get_data
+    data = self._data_queue.get(timeout=timeout)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/queues.py", line 113, in get
+    if not self._poll(timeout):
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/connection.py", line 257, in poll
+    return self._poll(timeout)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/connection.py", line 424, in _poll
+    r = wait([self], timeout)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/connection.py", line 931, in wait
+    ready = selector.select(timeout)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/call.py", line 38, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 650, in _fit_impl
+    self._run(model, ckpt_path=self.ckpt_path)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1112, in _run
+    results = self._run_stage()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1191, in _run_stage
+    self._run_train()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1214, in _run_train
+    self.fit_loop.run()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/autograd/anomaly_mode.py", line 108, in __exit__
+    def __exit__(self, *args: Any) -> None:
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/_utils/signal_handling.py", line 66, in handler
+    _error_if_any_worker_fails()
+RuntimeError: DataLoader worker (pid 38415) is killed by signal: Interrupt: 2.
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 138, in <module>
+    main(config)
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 89, in main
+    trainer.fit(
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 608, in fit
+    call._call_and_handle_interrupt(
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/call.py", line 63, in _call_and_handle_interrupt
+    trainer._teardown()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1180, in _teardown
+    self._logger_connector.teardown()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/connectors/logger_connector/logger_connector.py", line 263, in teardown
+    self._progress_bar_metrics = apply_to_collection(self._progress_bar_metrics, *args)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/lightning_utilities/core/apply_func.py", line 59, in apply_to_collection
+    v = apply_to_collection(
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/lightning_utilities/core/apply_func.py", line 56, in apply_to_collection
+    if isinstance(data, Mapping):
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/typing.py", line 720, in __instancecheck__
+    return self.__subclasscheck__(type(obj))
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/typing.py", line 852, in __subclasscheck__
+    return issubclass(cls, self.__origin__)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/abc.py", line 123, in __subclasscheck__
+    return _abc_subclasscheck(cls, subclass)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/abc.py", line 123, in __subclasscheck__
+    return _abc_subclasscheck(cls, subclass)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/abc.py", line 123, in __subclasscheck__
+    return _abc_subclasscheck(cls, subclass)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/_utils/signal_handling.py", line 66, in handler
+    _error_if_any_worker_fails()
+RuntimeError: DataLoader worker (pid 38448) exited unexpectedly with exit code 1. Details are lost due to multiprocessing. Rerunning with num_workers=0 may give better error trace.
+Validation: 0it [00:00, ?it/s]
