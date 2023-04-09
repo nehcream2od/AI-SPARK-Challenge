@@ -1849,3 +1849,7 @@
 2023-04-09 20:18:28,401 INFO    MainThread:55684 [wandb_run.py:_footer_sync_info():3434] logging synced files
 2023-04-09 20:18:28,402 DEBUG   HandlerThread:55684 [handler.py:handle_request():144] handle_request: shutdown
 2023-04-09 20:18:28,402 INFO    HandlerThread:55684 [handler.py:finish():845] shutting down handler
+2023-04-09 20:18:29,186 INFO    WriterThread:55684 [datastore.py:close():298] close: saved/wandb/run-20230409_201806-jgnx2xgb/run-jgnx2xgb.wandb
+2023-04-09 20:18:29,403 INFO    SenderThread:55684 [sender.py:finish():1550] shutting down sender
+2023-04-09 20:18:29,403 INFO    SenderThread:55684 [file_pusher.py:finish():168] shutting down file pusher
+2023-04-09 20:18:29,403 INFO    SenderThread:55684 [file_pusher.py:join():173] waiting for file pusher

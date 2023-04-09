@@ -54,12 +54,11 @@ class CustomDataModule(BaseDataModule):
         shuffle,
         num_workers,
         prepare_data_per_node,
-        *args,
         kfold=None,
         preprocess_fn=None,
         **kwargs,
     ):
-        super().__init__(data_dir, *args, **kwargs)
+        super().__init__(data_dir, **kwargs)
 
         self.data_dir = data_dir
         self.batch_size = batch_size
@@ -68,16 +67,6 @@ class CustomDataModule(BaseDataModule):
         self.prepare_data_per_node = prepare_data_per_node
         self.preprocess_fn = preprocess_fn
         self.kfold = kfold
-        # if self.kfold["n_splits"] > 1:
-        #     n_splits = self.kfold.get("n_splits", 5)
-        #     shuffle = self.kfold.get("shuffle", True)
-        #     random_state = self.kfold.get("random_state", None)
-
-        #     self.kfold = KFold(
-        #         n_splits=n_splits, shuffle=shuffle, random_state=random_state
-        #     )
-        # else:
-        #     self.kfold = None
 
     def prepare_data(self):
         self.train_df = pd.read_csv(self.data_dir + "/train.csv")
@@ -96,48 +85,33 @@ class CustomDataModule(BaseDataModule):
             )
 
             if self.preprocess_fn:
-                if self.preprocess_fn.get("scaler"):
-                    train_subset, predict_subset = apply_scaler(
-                        train_subset,
-                        predict_subset,
-                        self.preprocess_fn["scaler"],
-                    )
-                if (
-                    self.preprocess_fn.get("fourier_transform")
-                    and self.preprocess_fn["fourier_transform"]["apply"]
-                ):
-                    train_subset = apply_fourier_transform(
-                        train_subset,
-                        self.preprocess_fn["fourier_transform"]["features"],
-                    )
-                    predict_subset = apply_fourier_transform(
-                        predict_subset,
-                        self.preprocess_fn["fourier_transform"]["features"],
-                    )
+                train_subset, predict_subset = self._apply_preprocessing(
+                    train_subset, predict_subset
+                )
 
             self.train_datasets.append(CustomTrainDataset(train_subset))
             self.predict_datasets.append(CustomPredictDataset(predict_subset))
 
-    def train_dataloader(self):
-        pass
-
-    def val_dataloader(self, fold=None):
-        pass
-
-    def test_dataloader(self):
-        pass
-
-    def predict_dataloader(self):
-        predict_loaders = [
-            DataLoader(
-                dataset,
-                batch_size=self.batch_size,
-                shuffle=False,
-                num_workers=self.num_workers,
+    def _apply_preprocessing(self, train_subset, predict_subset):
+        if self.preprocess_fn.get("scaler"):
+            train_subset, predict_subset = apply_scaler(
+                train_subset,
+                predict_subset,
+                self.preprocess_fn["scaler"],
             )
-            for dataset in self.predict_datasets
-        ]
-        return predict_loaders
+        if (
+            self.preprocess_fn.get("fourier_transform")
+            and self.preprocess_fn["fourier_transform"]["apply"]
+        ):
+            train_subset = apply_fourier_transform(
+                train_subset,
+                self.preprocess_fn["fourier_transform"]["features"],
+            )
+            predict_subset = apply_fourier_transform(
+                predict_subset,
+                self.preprocess_fn["fourier_transform"]["features"],
+            )
+        return train_subset, predict_subset
 
     def train_val_dataloader(self):
         if self.kfold is None:
@@ -181,8 +155,6 @@ class CustomDataModule(BaseDataModule):
             )
 
         return train_loaders, val_loaders
-
-    # train_dataloader, val_dataloader, test_dataloader 메서드는 필요하지 않으므로 삭제합니다.
 
     def predict_dataloader(self):
         predict_loaders = [
