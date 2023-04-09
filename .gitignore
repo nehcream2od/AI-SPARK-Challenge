@@ -132,7 +132,7 @@ dmypy.json
 .DS_Store
 
 # Ignore everything in the saved directory
-saved/*
+saved/
 
 # Except for .gitignore
 !saved/.gitignore
