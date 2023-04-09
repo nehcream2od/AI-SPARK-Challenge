@@ -68,6 +68,16 @@ class CustomDataModule(BaseDataModule):
         self.prepare_data_per_node = prepare_data_per_node
         self.preprocess_fn = preprocess_fn
         self.kfold = kfold
+        # if self.kfold["n_splits"] > 1:
+        #     n_splits = self.kfold.get("n_splits", 5)
+        #     shuffle = self.kfold.get("shuffle", True)
+        #     random_state = self.kfold.get("random_state", None)
+
+        #     self.kfold = KFold(
+        #         n_splits=n_splits, shuffle=shuffle, random_state=random_state
+        #     )
+        # else:
+        #     self.kfold = None
 
     def prepare_data(self):
         self.train_df = pd.read_csv(self.data_dir + "/train.csv")
@@ -108,37 +118,11 @@ class CustomDataModule(BaseDataModule):
             self.train_datasets.append(CustomTrainDataset(train_subset))
             self.predict_datasets.append(CustomPredictDataset(predict_subset))
 
-    def train_dataloader(self, fold=None):
-        if fold is not None:
-            train_loaders, _ = self.train_val_dataloader()
-            return train_loaders[fold]
-        else:
-            train_loaders = [
-                DataLoader(
-                    dataset,
-                    batch_size=self.batch_size,
-                    shuffle=self.shuffle,
-                    num_workers=self.num_workers,
-                )
-                for dataset in self.train_datasets
-            ]
-            return train_loaders
+    def train_dataloader(self):
+        pass
 
     def val_dataloader(self, fold=None):
-        if fold is not None:
-            _, val_loaders = self.train_val_dataloader()
-            return val_loaders[fold]
-        else:
-            val_loaders = [
-                DataLoader(
-                    dataset,
-                    batch_size=self.batch_size,
-                    shuffle=False,
-                    num_workers=self.num_workers,
-                )
-                for dataset in self.train_datasets
-            ]
-            return val_loaders
+        pass
 
     def test_dataloader(self):
         pass
@@ -155,7 +139,7 @@ class CustomDataModule(BaseDataModule):
         ]
         return predict_loaders
 
-    def train_val_dataloader(self, fold=None):
+    def train_val_dataloader(self):
         if self.kfold is None:
             raise ValueError("Kfold options are not provided.")
         n_splits = self.kfold.get("n_splits", 5)
@@ -163,7 +147,8 @@ class CustomDataModule(BaseDataModule):
         random_state = self.kfold.get("random_state", None)
 
         kfold = KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
-        train_val_loaders = []
+
+        train_loaders, val_loaders = [], []
 
         for train_dataset in self.train_datasets:
             train_indices, val_indices = [], []
@@ -172,24 +157,42 @@ class CustomDataModule(BaseDataModule):
                 train_indices.append(train_idx)
                 val_indices.append(val_idx)
 
-            train_val_loader = [
-                (
+            train_loaders.append(
+                [
                     DataLoader(
                         train_dataset,
                         batch_size=self.batch_size,
                         sampler=SubsetRandomSampler(train_idx),
                         num_workers=self.num_workers,
-                    ),
+                    )
+                    for train_idx in train_indices
+                ]
+            )
+            val_loaders.append(
+                [
                     DataLoader(
                         train_dataset,
                         batch_size=self.batch_size,
                         sampler=SubsetRandomSampler(val_idx),
                         num_workers=self.num_workers,
-                    ),
-                )
-                for train_idx, val_idx in zip(train_indices, val_indices)
-            ]
+                    )
+                    for val_idx in val_indices
+                ]
+            )
 
-            train_val_loaders.extend(train_val_loader)
+        return train_loaders, val_loaders
 
-        return train_val_loaders
+    # train_dataloader, val_dataloader, test_dataloader 메서드는 필요하지 않으므로 삭제합니다.
+
+    def predict_dataloader(self):
+        predict_loaders = [
+            DataLoader(
+                dataset,
+                batch_size=self.batch_size,
+                shuffle=False,
+                num_workers=self.num_workers,
+            )
+            for dataset in self.predict_datasets
+        ]
+
+        return predict_loaders

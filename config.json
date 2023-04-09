@@ -14,14 +14,15 @@
             ]
         }
     },
+    "seed": 42,
     "data_module": {
         "type": "CustomDataModule",
         "args": {
             "data_dir": "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/data",
             "batch_size": 32,
             "shuffle": true,
-            "num_workers": 8,
-            "prepare_data_per_node": true,
+            "num_workers": 0,
+            "prepare_data_per_node": false,
             "preprocess_fn": {
                 "scaler": "standard",
                 "scaler_comment": [
@@ -66,7 +67,7 @@
     "trainer": {
         "accelerator": "cpu",
         "devices": 1,
-        "max_epochs": 10,
+        "max_epochs": 1,
         "save_dir": "saved/"
     }
 }

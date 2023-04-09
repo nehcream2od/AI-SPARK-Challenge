@@ -69,3 +69,12 @@ class GANModel(BaseModel):
         super(GANModel, self).__init__()
         self.generator = Generator(input_size, gen_hidden_size, output_size)
         self.discriminator = Discriminator(output_size, dsc_hidden_size, 1)
+
+
+class GeneratorWrapper(BaseModel):
+    def __init__(self, generator):
+        super().__init__()
+        self.generator = generator
+
+    def forward(self, x):
+        return self.generator(x)
