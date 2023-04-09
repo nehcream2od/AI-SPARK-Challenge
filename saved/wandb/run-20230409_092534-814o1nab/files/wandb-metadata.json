@@ -1,0 +1,37 @@
+{
+    "os": "macOS-13.2-arm64-arm-64bit",
+    "python": "3.9.16",
+    "heartbeatAt": "2023-04-09T00:25:35.581411",
+    "startedAt": "2023-04-09T00:25:34.726724",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "-c",
+        "config.json"
+    ],
+    "state": "running",
+    "program": "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py",
+    "codePath": "train.py",
+    "git": {
+        "remote": "https://github.com/nehcream2od/AI-SPARK-Challenge.git",
+        "commit": "3798a337d7ba6e81c25e5ba99fc73e7ccdd67197"
+    },
+    "email": "nehcream@gmail.com",
+    "root": "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge",
+    "host": "bag-yunsus-MacBook-Air.local",
+    "username": "nehcream",
+    "executable": "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "disk": {
+        "total": 460.4317207336426,
+        "used": 159.53329849243164
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 8.0
+    }
+}

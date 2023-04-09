@@ -1,110 +1,141 @@
-import numpy as np
 import torch
-from torchvision.utils import make_grid
-from base import BaseTrainer
-from utils import inf_loop, MetricTracker
+from base import BaseLitModule
+from model.optimizer import Lion
 
 
-class Trainer(BaseTrainer):
-    """
-    Trainer class
-    """
-    def __init__(self, model, criterion, metric_ftns, optimizer, config, device,
-                 data_loader, valid_data_loader=None, lr_scheduler=None, len_epoch=None):
-        super().__init__(model, criterion, metric_ftns, optimizer, config)
+class LitGANTrainer(BaseLitModule):
+    def __init__(
+        self,
+        model,
+        criterion_gen,
+        criterion_disc,
+        config,
+        alpha=0.5,
+    ):
+        super().__init__()
+        self.generator = model.generator
+        self.discriminator = model.discriminator
+        self.criterion_gen = criterion_gen
+        self.criterion_disc = criterion_disc
         self.config = config
-        self.device = device
-        self.data_loader = data_loader
-        if len_epoch is None:
-            # epoch-based training
-            self.len_epoch = len(self.data_loader)
-        else:
-            # iteration-based training
-            self.data_loader = inf_loop(data_loader)
-            self.len_epoch = len_epoch
-        self.valid_data_loader = valid_data_loader
-        self.do_validation = self.valid_data_loader is not None
-        self.lr_scheduler = lr_scheduler
-        self.log_step = int(np.sqrt(data_loader.batch_size))
+        self.alpha = alpha
 
-        self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
-        self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+    def forward(self, x):
+        return self.generator(x)
 
-    def _train_epoch(self, epoch):
-        """
-        Training logic for an epoch
+    def training_step(self, batch, batch_idx, optimizer_idx):
+        inputs = batch
+        batch_size = inputs.size(0)
 
-        :param epoch: Integer, current training epoch.
-        :return: A log that contains average loss and metric in this epoch.
-        """
-        self.model.train()
-        self.train_metrics.reset()
-        for batch_idx, (data, target) in enumerate(self.data_loader):
-            data, target = data.to(self.device), target.to(self.device)
+        # Train the discriminator
+        if optimizer_idx == 1:
+            optimizer_D = self.optimizers()[1]
+            optimizer_D.zero_grad()
 
-            self.optimizer.zero_grad()
-            output = self.model(data)
-            loss = self.criterion(output, target)
-            loss.backward()
-            self.optimizer.step()
+            # Train on real data
+            real_output = self.discriminator(inputs)
+            real_label = torch.ones(batch_size, 1, device=self.device)
+            real_loss = self.criterion_disc(real_output, real_label)
+            self.log("discriminator_real_loss", real_loss)
 
-            self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
-            self.train_metrics.update('loss', loss.item())
-            for met in self.metric_ftns:
-                self.train_metrics.update(met.__name__, met(output, target))
+            # Train on fake data
+            fake_inputs = self.generator(inputs)
+            fake_output = self.discriminator(fake_inputs.detach())
+            fake_label = torch.zeros(batch_size, 1, device=self.device)
+            fake_loss = self.criterion_disc(fake_output, fake_label)
+            self.log("discriminator_fake_loss", fake_loss)
 
-            if batch_idx % self.log_step == 0:
-                self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(
-                    epoch,
-                    self._progress(batch_idx),
-                    loss.item()))
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+            # Update the discriminator
+            disc_loss = real_loss + fake_loss
+            self.log("discriminator_loss", disc_loss)
+            disc_loss.backward()
+            optimizer_D.step()
 
-            if batch_idx == self.len_epoch:
-                break
-        log = self.train_metrics.result()
+            return {"loss": disc_loss}
 
-        if self.do_validation:
-            val_log = self._valid_epoch(epoch)
-            log.update(**{'val_'+k : v for k, v in val_log.items()})
+        # Train the generator
+        if optimizer_idx == 0:
+            optimizer_G = self.optimizers()[0]
+            optimizer_G.zero_grad()
 
-        if self.lr_scheduler is not None:
-            self.lr_scheduler.step()
-        return log
+            # Use the existing fake_inputs
+            fake_inputs = self.generator(inputs)
+            fake_output = self.discriminator(fake_inputs)
 
-    def _valid_epoch(self, epoch):
-        """
-        Validate after training an epoch
+            # Update the generator
+            real_label = torch.ones(
+                batch_size, 1, device=self.device
+            )  # Assign new real_label
+            gen_loss = self.criterion_gen(
+                fake_inputs, inputs
+            ) * self.alpha + self.criterion_disc(fake_output, real_label) * (
+                1 - self.alpha
+            )
+            self.log("generator_loss", gen_loss)
+            gen_loss.backward()
+            optimizer_G.step()
 
-        :param epoch: Integer, current training epoch.
-        :return: A log that contains information about validation
-        """
-        self.model.eval()
-        self.valid_metrics.reset()
+            return {"loss": gen_loss}
+
+    def validation_step(self, batch, batch_idx):
         with torch.no_grad():
-            for batch_idx, (data, target) in enumerate(self.valid_data_loader):
-                data, target = data.to(self.device), target.to(self.device)
+            self.generator.eval()
+            self.discriminator.eval()
 
-                output = self.model(data)
-                loss = self.criterion(output, target)
+            inputs = batch
+            batch_size = inputs.size(0)
 
-                self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
-                self.valid_metrics.update('loss', loss.item())
-                for met in self.metric_ftns:
-                    self.valid_metrics.update(met.__name__, met(output, target))
-                self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+            # Calculate losses for the discriminator
+            real_output = self.discriminator(inputs)
+            real_label = torch.ones(batch_size, 1, device=self.device)
+            real_loss = self.criterion_disc(real_output, real_label)
 
-        # add histogram of model parameters to the tensorboard
-        for name, p in self.model.named_parameters():
-            self.writer.add_histogram(name, p, bins='auto')
-        return self.valid_metrics.result()
+            fake_inputs = self.generator(inputs)
+            fake_output = self.discriminator(fake_inputs)
+            fake_label = torch.zeros(batch_size, 1, device=self.device)
+            fake_loss = self.criterion_disc(fake_output, fake_label)
 
-    def _progress(self, batch_idx):
-        base = '[{}/{} ({:.0f}%)]'
-        if hasattr(self.data_loader, 'n_samples'):
-            current = batch_idx * self.data_loader.batch_size
-            total = self.data_loader.n_samples
+            disc_loss = real_loss + fake_loss
+            self.log(
+                "val_discriminator_loss",
+                disc_loss,
+                on_step=False,
+                on_epoch=True,
+                prog_bar=True,
+            )
+
+            # Calculate loss for the generator
+            gen_loss = self.criterion_gen(
+                fake_inputs, inputs
+            ) * self.alpha + self.criterion_disc(fake_output, real_label) * (
+                1 - self.alpha
+            )
+            self.log(
+                "val_generator_loss",
+                gen_loss,
+                on_step=False,
+                on_epoch=True,
+                prog_bar=True,
+            )
+
+    def validation_epoch_end(self, outputs):
+        pass
+
+    def configure_optimizers(self):
+        if self.config["gen_optimizer"]["type"] == "Lion":
+            optimizer_g = Lion(
+                self.generator.parameters(), **self.config["gen_optimizer"]["args"]
+            )
         else:
-            current = batch_idx
-            total = self.len_epoch
-        return base.format(current, total, 100.0 * current / total)
+            optimizer_g = getattr(torch.optim, self.config["gen_optimizer"]["type"])(
+                self.generator.parameters(), **self.config["gen_optimizer"]["args"]
+            )
+        if self.config["dsc_optimizer"]["type"] == "Lion":
+            optimizer_d = Lion(
+                self.discriminator.parameters(), **self.config["dsc_optimizer"]["args"]
+            )
+        else:
+            optimizer_d = getattr(torch.optim, self.config["dsc_optimizer"]["type"])(
+                self.discriminator.parameters(), **self.config["dsc_optimizer"]["args"]
+            )
+        return [optimizer_g, optimizer_d]

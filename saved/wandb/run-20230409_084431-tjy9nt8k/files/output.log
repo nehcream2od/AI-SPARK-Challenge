@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 129, in <module>
+    main(config)
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 69, in main
+    trainer = LitGANTrainer(
+TypeError: __init__() got an unexpected keyword argument 'accelerator'

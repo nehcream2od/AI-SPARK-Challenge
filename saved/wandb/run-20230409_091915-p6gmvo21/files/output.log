@@ -1,0 +1,14 @@
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+Traceback (most recent call last):
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 137, in <module>
+    main(config)
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 84, in main
+    metric_ftns=[config.init_obj("metric", module_metric)],
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/parse_config.py", line 88, in init_obj
+    module_name = self[name]["type"]
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/parse_config.py", line 129, in __getitem__
+    return self.config[name]
+KeyError: 'metric'

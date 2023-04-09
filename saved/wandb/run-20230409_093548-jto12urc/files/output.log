@@ -1,0 +1,91 @@
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+  | Name          | Type          | Params
+------------------------------------------------
+0 | generator     | Generator     | 575
+1 | discriminator | Discriminator | 89
+------------------------------------------------
+664       Trainable params
+0         Non-trainable params
+664       Total params
+0.003     Total estimated model params size (MB)
+Sanity Checking: 0it [00:00, ?it/s]
+/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py:1609: PossibleUserWarning: The number of training batches (3) is smaller than the logging interval Trainer(log_every_n_steps=50). Set a lower value for log_every_n_steps if you want to see logs for the training epoch.
+
+Epoch 0:   0%|                                                                                                                              | 0/4 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 138, in <module>
+    main(config)
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 89, in main
+    trainer.fit(
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 608, in fit
+    call._call_and_handle_interrupt(
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/call.py", line 38, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 650, in _fit_impl
+    self._run(model, ckpt_path=self.ckpt_path)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1112, in _run
+    results = self._run_stage()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1191, in _run_stage
+    self._run_train()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1214, in _run_train
+    self.fit_loop.run()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/fit_loop.py", line 267, in advance
+    self._outputs = self.epoch_loop.run(self._data_fetcher)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/epoch/training_epoch_loop.py", line 213, in advance
+    batch_output = self.batch_loop.run(kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/batch/training_batch_loop.py", line 88, in advance
+    outputs = self.optimizer_loop.run(optimizers, kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/loop.py", line 199, in run
+    self.advance(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 202, in advance
+    result = self._run_optimization(kwargs, self._optimizers[self.optim_progress.optimizer_position])
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 249, in _run_optimization
+    self._optimizer_step(optimizer, opt_idx, kwargs.get("batch_idx", 0), closure)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 370, in _optimizer_step
+    self.trainer._call_lightning_module_hook(
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1356, in _call_lightning_module_hook
+    output = fn(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/core/module.py", line 1742, in optimizer_step
+    optimizer.step(closure=optimizer_closure)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/core/optimizer.py", line 169, in step
+    step_output = self._strategy.optimizer_step(self._optimizer, self._optimizer_idx, closure, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/strategies/strategy.py", line 234, in optimizer_step
+    return self.precision_plugin.optimizer_step(
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/plugins/precision/precision_plugin.py", line 119, in optimizer_step
+    return optimizer.step(closure=closure, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/optim/optimizer.py", line 113, in wrapper
+    return func(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/optim/adam.py", line 118, in step
+    loss = closure()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/plugins/precision/precision_plugin.py", line 105, in _wrap_closure
+    closure_result = closure()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 149, in __call__
+    self._result = self.closure(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 144, in closure
+    self._backward_fn(step_output.closure_loss)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 305, in backward_fn
+    self.trainer._call_strategy_hook("backward", loss, optimizer, opt_idx)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1494, in _call_strategy_hook
+    output = fn(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/strategies/strategy.py", line 207, in backward
+    self.precision_plugin.backward(closure_loss, self.lightning_module, optimizer, optimizer_idx, *args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/plugins/precision/precision_plugin.py", line 67, in backward
+    model.backward(tensor, optimizer, optimizer_idx, *args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/core/module.py", line 1486, in backward
+    loss.backward(*args, **kwargs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/_tensor.py", line 396, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/autograd/__init__.py", line 173, in backward
+    Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+RuntimeError: Trying to backward through the graph a second time (or directly access saved tensors after they have already been freed). Saved intermediate values of the graph are freed when you call .backward() or autograd.grad(). Specify retain_graph=True if you need to backward through the graph a second time or if you need to access saved tensors after calling backward.

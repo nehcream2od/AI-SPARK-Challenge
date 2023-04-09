@@ -1,0 +1,12 @@
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+Traceback (most recent call last):
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 138, in <module>
+    main(config)
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 80, in main
+    lit_gan_trainer = LitGANTrainer(
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/trainer/trainer.py", line 16, in __init__
+    super().__init__()
+TypeError: __init__() missing 5 required positional arguments: 'model', 'criterion', 'metric_ftns', 'optimizer_config', and 'config'

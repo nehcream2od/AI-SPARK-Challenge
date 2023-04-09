@@ -3,20 +3,69 @@ import torch.nn.functional as F
 from base import BaseModel
 
 
-class MnistModel(BaseModel):
-    def __init__(self, num_classes=10):
-        super().__init__()
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
-        self.fc1 = nn.Linear(320, 50)
-        self.fc2 = nn.Linear(50, num_classes)
+class Generator(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(Generator, self).__init__()
+
+        self.fc1 = nn.Linear(input_size, hidden_size[0])
+        self.fc2 = nn.Linear(hidden_size[0], hidden_size[1])
+        self.fc3 = nn.Linear(hidden_size[1], hidden_size[0])
+        self.fc4 = nn.Linear(hidden_size[0], output_size)
+        self.layer_norm_hidden_0 = nn.LayerNorm(hidden_size[0])
+        self.layer_norm_hidden_1 = nn.LayerNorm(hidden_size[1])
+        self.rrelu = nn.RReLU()
+        self.drop = nn.Dropout(0.0)
+
+        self.apply(self._init_weights)
 
     def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 320)
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
+        x = self.rrelu(self.fc1(x))
+        x = self.drop(x)
+        x = self.layer_norm_hidden_0(x)
+        x = self.rrelu(self.fc2(x))
+        x = self.drop(x)
+        x = self.layer_norm_hidden_1(x)
+        x = self.rrelu(self.fc3(x))
+        x = self.drop(x)
+        x = self.layer_norm_hidden_0(x)
+        x = self.fc4(x)
+        return x
+
+    def _init_weights(self, module):
+        for layer in module.modules():
+            if isinstance(layer, nn.Linear):
+                nn.init.kaiming_normal_(layer.weight)
+
+
+class Discriminator(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(Discriminator, self).__init__()
+
+        self.fc1 = nn.Linear(input_size, hidden_size[0])
+        self.fc2 = nn.Linear(hidden_size[0], output_size)
+        self.layer_norm_hidden_0 = nn.LayerNorm(hidden_size[0])
+        self.rrelu = nn.RReLU()
+        self.sigmoid = nn.Sigmoid()
+        self.drop = nn.Dropout(0.0)
+
+        self.apply(self._init_weights)
+
+    def forward(self, x):
+        x = self.rrelu(self.fc1(x))
+        x = self.drop(x)
+        x = self.layer_norm_hidden_0(x)
         x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
+        # x = self.sigmoid(x)
+        return x
+
+    def _init_weights(self, module):
+        for layer in module.modules():
+            if isinstance(layer, nn.Linear):
+                nn.init.kaiming_normal_(layer.weight)
+
+
+class GANModel(BaseModel):
+    def __init__(self, input_size, output_size, gen_hidden_size, dsc_hidden_size):
+        super(GANModel, self).__init__()
+        self.generator = Generator(input_size, gen_hidden_size, output_size)
+        self.discriminator = Discriminator(output_size, dsc_hidden_size, 1)

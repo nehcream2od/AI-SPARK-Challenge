@@ -1,0 +1,22 @@
+2023-04-09 08:25:51,286 - train - INFO - Training on fold 0
+2023-04-09 08:25:51,287 - train - INFO - GANModel(
+  (generator): Generator(
+    (fc1): Linear(in_features=7, out_features=16, bias=True)
+    (fc2): Linear(in_features=16, out_features=8, bias=True)
+    (fc3): Linear(in_features=8, out_features=16, bias=True)
+    (fc4): Linear(in_features=16, out_features=7, bias=True)
+    (layer_norm_hidden_0): LayerNorm((16,), eps=1e-05, elementwise_affine=True)
+    (layer_norm_hidden_1): LayerNorm((8,), eps=1e-05, elementwise_affine=True)
+    (rrelu): RReLU(lower=0.125, upper=0.3333333333333333)
+    (drop): Dropout(p=0.0, inplace=False)
+  )
+  (discriminator): Discriminator(
+    (fc1): Linear(in_features=7, out_features=8, bias=True)
+    (fc2): Linear(in_features=8, out_features=1, bias=True)
+    (layer_norm_hidden_0): LayerNorm((8,), eps=1e-05, elementwise_affine=True)
+    (rrelu): RReLU(lower=0.125, upper=0.3333333333333333)
+    (sigmoid): Sigmoid()
+    (drop): Dropout(p=0.0, inplace=False)
+  )
+)
+Trainable parameters: 664
