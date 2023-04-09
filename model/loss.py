@@ -26,12 +26,10 @@ class FocalLoss(nn.Module):
     def forward(self, pred, true):
         bceloss = self.loss_fn(pred, true)
 
-        pred_prob = torch.sigmoid(
-            pred
-        )  # p  pt는 p가 true 이면 pt = p / false 이면 pt = 1 - p
-        alpha_factor = true * self.alpha + (1 - true) * (1 - self.alpha)  # add balance
-        modulating_factor = torch.abs(true - pred_prob) ** self.gamma  # focal term
-        loss = alpha_factor * modulating_factor * bceloss  # bceloss에 이미 음수가 들어가 있음
+        pred_prob = torch.sigmoid(pred)
+        alpha_factor = true * self.alpha + (1 - true) * (1 - self.alpha)
+        modulating_factor = torch.abs(true - pred_prob) ** self.gamma
+        loss = alpha_factor * modulating_factor * bceloss
 
         if self.reduction == "mean":
             return loss.mean()

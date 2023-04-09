@@ -28,8 +28,6 @@ os.environ["PYTHONHASHSEED"] = str(SEED)
 
 
 def ensemble_models(fold_results):
-    # This is just an example of averaging the fold results.
-    # Modify this function according to the desired ensemble method.
     return np.mean(fold_results, axis=0)
 
 
@@ -120,15 +118,6 @@ def main(config):
             tp_result = np.concatenate(tp_result, axis=0)
             tp_fold_results.append(tp_result)
         print(np.array(tp_fold_results).shape)
-
-        # print(np.array(tp_fold_results).shape)
-        # Ensemble fold results for the current equipment type
-        # tp_ensemble_result = ensemble_models(tp_fold_results)
-        # ensemble_results.append(tp_ensemble_result)
-
-    # # Combine ensemble results for all equipment types
-    # ensemble_results = np.concatenate(ensemble_results, axis=0)
-    # print(pd.DataFrame(ensemble_results).shape)
 
 
 if __name__ == "__main__":
