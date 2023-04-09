@@ -130,3 +130,12 @@ dmypy.json
 
 # Mac-specific files
 .DS_Store
+
+# Ignore everything in the saved directory
+saved/*
+
+# Except for .gitignore
+!saved/.gitignore
+
+# Ignore all CSV files
+*.csv
