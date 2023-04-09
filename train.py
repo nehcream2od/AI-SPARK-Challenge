@@ -8,6 +8,7 @@ import data_module.data_module as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
+import model.optimizer as module_optimizer
 import numpy as np
 import torch
 from data_module.data_module import CustomDataModule
@@ -77,8 +78,18 @@ def main(config):
             model=model,
             criterion_gen=getattr(module_loss, config["criterion_gen"]),
             criterion_disc=getattr(module_loss, config["criterion_disc"]),
-            gen_optimizer_class=getattr(torch.optim, config["gen_optimizer"]["type"]),
-            disc_optimizer_class=getattr(torch.optim, config["disc_optimizer"]["type"]),
+            gen_optimizer_class=getattr(
+                module_optimizer
+                if config["gen_optimizer"]["type"] == "Lion"
+                else torch.optim,
+                config["gen_optimizer"]["type"],
+            ),
+            disc_optimizer_class=getattr(
+                module_optimizer
+                if config["disc_optimizer"]["type"] == "Lion"
+                else torch.optim,
+                config["disc_optimizer"]["type"],
+            ),
             config=config,
             alpha=config["alpha"],
         )

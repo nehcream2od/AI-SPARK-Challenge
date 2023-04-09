@@ -137,7 +137,7 @@ class ConfigParser:
         return logger
 
     # setting read-only attributes
-    @propert
+    @property
     def config(self):
         return self._config
 
