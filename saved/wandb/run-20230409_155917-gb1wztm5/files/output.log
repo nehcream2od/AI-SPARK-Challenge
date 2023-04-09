@@ -1,0 +1,43 @@
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+  | Name          | Type          | Params
+------------------------------------------------
+0 | generator     | Generator     | 575
+1 | discriminator | Discriminator | 89
+------------------------------------------------
+664       Trainable params
+0         Non-trainable params
+664       Total params
+0.003     Total estimated model params size (MB)
+
+
+Epoch 0:  79%|██████████████████████████▋       | 11/14 [00:04<00:01,  2.42it/s, v_num=ztm5, train_generator_loss_step=1.010, train_discriminator_loss_step=1.080]
+
+
+Epoch 1:  79%|▊| 11/14 [00:44<00:12,  4.03s/it, v_num=ztm5, train_generator_loss_step=0.719, train_discriminator_loss_step=1.290, val_discriminator_loss=2.110, va
+
+Validation: 0it [00:00, ?it/s]
+Exception ignored in: <function _MultiProcessingDataLoaderIter.__del__ at 0x14aa210d0>
+Traceback (most recent call last):
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1510, in __del__
+    self._shutdown_workers()
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1474, in _shutdown_workers
+    w.join(timeout=_utils.MP_STATUS_CHECK_INTERVAL)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/process.py", line 149, in join
+    res = self._popen.wait(timeout)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/popen_fork.py", line 40, in wait
+    if not wait([self.sentinel], timeout):
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/multiprocessing/connection.py", line 931, in wait
+    ready = selector.select(timeout)
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt:
+/opt/homebrew/Caskroom/miniconda/base/envs/datascience/lib/python3.9/site-packages/pytorch_lightning/trainer/call.py:48: UserWarning: Detected KeyboardInterrupt, attempting graceful shutdown...
+  rank_zero_warn("Detected KeyboardInterrupt, attempting graceful shutdown...")
+Traceback (most recent call last):
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 137, in <module>
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 97, in main
+    fold_results.append(result)
+TypeError: validate() got an unexpected keyword argument 'val_dataloaders'

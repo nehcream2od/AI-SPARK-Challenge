@@ -1,6 +1,5 @@
 import torch
 from base import BaseLitModule
-from model.optimizer import Lion
 
 
 class LitGANTrainer(BaseLitModule):
@@ -9,14 +8,18 @@ class LitGANTrainer(BaseLitModule):
         model,
         criterion_gen,
         criterion_disc,
+        gen_optimizer_class,
+        disc_optimizer_class,
         config,
-        alpha=0.5,
+        alpha,
     ):
         super().__init__()
         self.generator = model.generator
         self.discriminator = model.discriminator
         self.criterion_gen = criterion_gen
         self.criterion_disc = criterion_disc
+        self.gen_optimizer_class = gen_optimizer_class
+        self.disc_optimizer_class = disc_optimizer_class
         self.config = config
         self.alpha = alpha
         self.automatic_optimization = False
@@ -105,20 +108,11 @@ class LitGANTrainer(BaseLitModule):
         self.log("val_generator_loss", avg_gen_loss, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
-        if self.config["gen_optimizer"]["type"] == "Lion":
-            optimizer_g = Lion(
-                self.generator.parameters(), **self.config["gen_optimizer"]["args"]
-            )
-        else:
-            optimizer_g = getattr(torch.optim, self.config["gen_optimizer"]["type"])(
-                self.generator.parameters(), **self.config["gen_optimizer"]["args"]
-            )
-        if self.config["dsc_optimizer"]["type"] == "Lion":
-            optimizer_d = Lion(
-                self.discriminator.parameters(), **self.config["dsc_optimizer"]["args"]
-            )
-        else:
-            optimizer_d = getattr(torch.optim, self.config["dsc_optimizer"]["type"])(
-                self.discriminator.parameters(), **self.config["dsc_optimizer"]["args"]
-            )
+        optimizer_g = self.gen_optimizer_class(
+            self.generator.parameters(), **self.config["gen_optimizer"]["args"]
+        )
+        optimizer_d = self.disc_optimizer_class(
+            self.discriminator.parameters(), **self.config["disc_optimizer"]["args"]
+        )
+
         return [optimizer_g, optimizer_d]

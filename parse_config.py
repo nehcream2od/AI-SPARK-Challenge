@@ -103,7 +103,6 @@ class ConfigParser:
                 prepare_data_per_node=module_args["prepare_data_per_node"],
                 preprocess_fn=module_args["preprocess_fn"],
             )
-
         else:
             return getattr(module, module_name)(*args, **module_args)
 
@@ -138,7 +137,7 @@ class ConfigParser:
         return logger
 
     # setting read-only attributes
-    @property
+    @propert
     def config(self):
         return self._config
 

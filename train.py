@@ -2,21 +2,21 @@ import argparse
 import collections
 import os
 import random
+from importlib import import_module
+
 import data_module.data_module as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
 import numpy as np
 import torch
-from parse_config import ConfigParser
-from trainer import LitGANTrainer
-from utils import prepare_device
-from pytorch_lightning import Trainer
-from importlib import import_module
 from data_module.data_module import CustomDataModule
 from lightning.pytorch.loggers import WandbLogger
+from parse_config import ConfigParser
+from pytorch_lightning import Trainer
+from trainer import LitGANTrainer
 from trainer.trainer import LitGANTrainer
-
+from utils import prepare_device
 
 # fix random seeds for reproducibility
 SEED = 123
@@ -60,11 +60,6 @@ def main(config):
             module_arch,
         )
 
-        # prepare for (multi-device) GPU training
-        device, device_ids = prepare_device(config["n_gpu"])
-        if len(device_ids) > 1:
-            model = torch.nn.DataParallel(model, device_ids=device_ids)
-
         # create a PyTorch Lightning trainer
         trainer = Trainer(
             accelerator=config["trainer"]["accelerator"],
@@ -81,9 +76,11 @@ def main(config):
         lit_gan_trainer = LitGANTrainer(
             model=model,
             criterion_gen=getattr(module_loss, config["criterion_gen"]),
-            criterion_disc=getattr(module_loss, config["criterion_dsc"]),
+            criterion_disc=getattr(module_loss, config["criterion_disc"]),
+            gen_optimizer_class=getattr(torch.optim, config["gen_optimizer"]["type"]),
+            disc_optimizer_class=getattr(torch.optim, config["disc_optimizer"]["type"]),
             config=config,
-            alpha=0.5,
+            alpha=config["alpha"],
         )
 
         # Train on the current fold

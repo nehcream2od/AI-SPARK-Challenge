@@ -1,0 +1,10 @@
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+Traceback (most recent call last):
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 146, in <module>
+    main(config)
+  File "/Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/train.py", line 84, in main
+    **config["gen_optimizer"]["args"],
+KeyError: 'args'

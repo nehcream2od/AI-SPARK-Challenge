@@ -1,0 +1,129 @@
+wandb_version: 1
+
+_config:
+  desc: null
+  value:
+    name: AI-SPARK-Challenge GANModel
+    arch:
+      type: GANModel
+      args:
+        input_size: 7
+        output_size: 7
+        gen_hidden_size:
+        - 16
+        - 8
+        dsc_hidden_size:
+        - 8
+    data_module:
+      type: CustomDataModule
+      args:
+        data_dir: /Users/nehcream/Documents/Workspace/Active/AI-SPARK-Challenge/data
+        batch_size: 32
+        shuffle: true
+        num_workers: 8
+        prepare_data_per_node: false
+        preprocess_fn:
+          scaler: standard
+          scaler_comment:
+          - 'False'
+          - minmax
+          - standard
+          - robust
+          - gaussian
+          - log
+          fourier_transform:
+            apply: false
+            features:
+            - motor_current
+            - motor_rpm
+            - motor_vibe
+        kfold:
+          n_splits: 5
+          shuffle: true
+          random_state: 42
+    gen_optimizer:
+      type: Adam
+      __args__:
+        lr: 0.001
+    disc_optimizer:
+      type: Adam
+      __args__:
+        lr: 0.001
+        weight_decay: 0
+        amsgrad: true
+    criterion_gen: mean_squared_error
+    criterion_disc: binary_cross_entropy_with_logits
+    alpha: 0.5
+    metrics:
+    - accuracy
+    - top_k_acc
+    lr_scheduler:
+      type: StepLR
+      args:
+        step_size: 50
+        gamma: 0.1
+    trainer:
+      accelerator: cpu
+      devices: 1
+      max_epochs: 100
+      save_dir: saved/
+      save_period: 1
+      verbosity: 2
+      monitor: min val_loss
+      early_stop: 10
+      tensorboard: true
+resume:
+  desc: null
+  value: null
+_save_dir:
+  desc: null
+  value: saved/models/AI-SPARK-Challenge GANModel/0409_152522
+_log_dir:
+  desc: null
+  value: saved/log/AI-SPARK-Challenge GANModel/0409_152522
+log_levels:
+  desc: null
+  value:
+    '0': 30
+    '1': 20
+    '2': 10
+_wandb:
+  desc: null
+  value:
+    python_version: 3.9.16
+    cli_version: 0.14.2
+    framework: lightning
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1681021523.820123
+    t:
+      1:
+      - 1
+      - 5
+      - 9
+      - 41
+      - 51
+      - 53
+      - 55
+      2:
+      - 1
+      - 5
+      - 9
+      - 41
+      - 51
+      - 53
+      - 55
+      3:
+      - 7
+      - 13
+      - 16
+      - 23
+      4: 3.9.16
+      5: 0.14.2
+      8:
+      - 4
+      - 5
+    m:
+    - 1: trainer/global_step
+      6:
+      - 3
