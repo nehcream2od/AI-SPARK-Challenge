@@ -48,12 +48,12 @@ $ git clone https://github.com/nehcream2od/AI-SPARK-Challenge.git
 2. 실행에 필요한 패키지들을 install 합니다.
 ```bash
 $ pip install -r requirements.txt
-
+'''
 3. 데이터셋을 `data/` 디렉토리에 위치시킵니다.(대회 규정으로 인해 데이터는 제공해드릴 수 없음을 양해 부탁드립니다.)
 
 4. 메인 실행 스크립트를 실행합니다.
 ```bash
 $ python train.py -c config.json
-
+'''
 ---
 이 프로젝트는 AI-SPARK-Challenge 대회에 참가하여 진행한 프로젝트입니다. 자세한 정보는 대회 웹사이트를 참조해주시기 바랍니다.
