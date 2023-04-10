@@ -1,6 +1,7 @@
 import torch
 import torchmetrics
 from base import BaseLitModule
+from model.scheduler import CosineAnnealingWarmUpRestarts
 
 
 class LitGANTrainer(BaseLitModule):
@@ -77,6 +78,10 @@ class LitGANTrainer(BaseLitModule):
         )
         self.log("train_generator_loss", avg_gen_loss, on_epoch=True, prog_bar=True)
 
+        # step scheduler
+        self.lr_schedulers()[0].step(self.current_epoch)
+        self.lr_schedulers()[1].step(self.current_epoch)
+
     def validation_step(self, batch, batch_idx):
         inputs = batch
         batch_size = inputs.size(0)
@@ -115,7 +120,24 @@ class LitGANTrainer(BaseLitModule):
             self.discriminator.parameters(), lr=self.disc_lr
         )
 
-        return [optimizer_g, optimizer_d]
+        scheduler_g = CosineAnnealingWarmUpRestarts(
+            optimizer_g,
+            T_0=self.config["gen_scheduler"]["args"]["T_0"],
+            T_mult=self.config["gen_scheduler"]["args"]["T_mult"],
+            eta_max=self.config["gen_scheduler"]["args"]["eta_max"],
+            T_up=self.config["gen_scheduler"]["args"]["T_up"],
+            gamma=self.config["gen_scheduler"]["args"]["gamma"],
+        )
+        scheduler_d = CosineAnnealingWarmUpRestarts(
+            optimizer_d,
+            T_0=self.config["disc_scheduler"]["args"]["T_0"],
+            T_mult=self.config["disc_scheduler"]["args"]["T_mult"],
+            eta_max=self.config["disc_scheduler"]["args"]["eta_max"],
+            T_up=self.config["disc_scheduler"]["args"]["T_up"],
+            gamma=self.config["disc_scheduler"]["args"]["gamma"],
+        )
+
+        return [optimizer_g, optimizer_d], [scheduler_g, scheduler_d]
 
     def _generator_loss(self, generated_inputs, inputs):
         valid = torch.ones(inputs.shape[0], 1, device=self.device)

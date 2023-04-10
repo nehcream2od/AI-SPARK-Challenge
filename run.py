@@ -71,18 +71,19 @@ def main(config):
             torch.compile(model)
 
             # set checkpoint
+            path = f"{config['trainer']['save_dir']}/type_{tp}_fold_{fold + 1}"
             checkpoint_callback = ModelCheckpoint(
-                monitor="val_mse",
+                monitor="val_generator_loss",
                 mode="min",
                 save_top_k=1,
                 save_last=False,
-                filename=f"{config['trainer']['save_dir']}/type_{tp + 1}_fold_{fold + 1}.ckpt",
+                filename=path,
                 verbose=True,
             )
 
             # set early stopping
             early_stop_callback = EarlyStopping(
-                monitor="val_mse",
+                monitor="val_generator_loss",
                 min_delta=0.00,
                 patience=100,
                 verbose=True,
@@ -95,7 +96,7 @@ def main(config):
                 name=config["name"],
                 config=config,
                 save_dir=config["trainer"]["save_dir"],
-                log_model="all",
+                log_model=False,
             )
 
             # Create PyTorch Lightning trainer
@@ -138,11 +139,22 @@ def main(config):
                 val_dataloaders=val_loader,
             )
 
+            # load best model
+            wandb_save_dir = wandb_logger.save_dir
+            run_id = wandb_logger.experiment.id
+            model.load_state_dict(
+                torch.load(
+                    f"./{wandb_save_dir}AI-SPARK-Challenge/{run_id}/checkpoints/saved/type_{tp}_fold_{fold + 1}.ckpt"
+                )["state_dict"]
+            )
+
             wrapped_generator = GeneratorWrapper(model.generator)
 
             with torch.no_grad():
                 # Calculate the reconstruction error for the current fold
-                reconstructed = trainer.predict(wrapped_generator, train_loader)
+                reconstructed = trainer.predict(
+                    wrapped_generator, train_loader
+                )
             reconstructed = flatten_batches(reconstructed)
             train_data = flatten_batches(train_loader)
             mse = np.mean(np.square(train_data - reconstructed), axis=1)
@@ -161,9 +173,18 @@ def main(config):
             mse_mean_per_fold.append(mse_test)
 
         threshold_mean = np.mean(threshold_mean_per_fold)
-        mse_mean = np.mean(mse_mean_per_fold, axis=0)
-        anomaly = mse_mean > threshold_mean
-        all_anomaly.extend(anomaly)
+
+        # Calculate binary predictions for each fold
+        binary_preds_per_fold = [
+            np.where(mse > threshold_mean, 1, 0) for mse in mse_mean_per_fold
+        ]
+
+        # Apply hard voting
+        hard_voting_preds = np.sum(binary_preds_per_fold, axis=0)
+        majority_vote = 3
+        final_preds = np.where(hard_voting_preds > majority_vote, 1, 0)
+
+        all_anomaly.extend(final_preds)
 
     # submission
     sample = pd.read_csv("./data/answer_sample.csv")
