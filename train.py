@@ -17,6 +17,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from trainer.trainer import LitGANTrainer
 from utils import flatten_batches
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 # Fix random seeds for reproducibility
 SEED = 123
@@ -41,6 +42,7 @@ def main(config):
     predict_loaders = data_module.predict_dataloader()
 
     all_anomaly = []
+
     for tp in range(len(train_loaders)):
         tp_fold_results = []  # fold 별 예측 결과 -> 1개의 설비
 
@@ -63,6 +65,25 @@ def main(config):
             # Compile
             torch.compile(model)
 
+            # set checkpoint
+            checkpoint_callback = ModelCheckpoint(
+                monitor="val_generator_loss",
+                mode="min",
+                save_top_k=1,
+                save_last=False,
+                filename=f"{config['trainer']['save_dir']}/type_{tp + 1}_fold_{fold + 1}.ckpt",
+                verbose=True,
+            )
+
+            # set early stopping
+            early_stop_callback = EarlyStopping(
+                monitor="val_generator_loss",
+                min_delta=0.00,
+                patience=100,
+                verbose=True,
+                mode="min",  # loss는 낮아야 좋음
+            )
+
             # Create PyTorch Lightning trainer
             trainer = Trainer(
                 accelerator=config["trainer"]["accelerator"],
@@ -75,6 +96,7 @@ def main(config):
                     save_dir=config["trainer"]["save_dir"],
                 ),
                 log_every_n_steps=100,
+                callbacks=[checkpoint_callback, early_stop_callback],
             )
 
             # Create Model trainer
@@ -104,12 +126,6 @@ def main(config):
                 train_dataloaders=train_loader,
                 val_dataloaders=val_loader,
             )
-
-            # Save fold-specific model checkpoint
-            checkpoint_path = (
-                f"{config['trainer']['save_dir']}/type_{tp + 1}_fold_{fold + 1}.ckpt"
-            )
-            trainer.save_checkpoint(checkpoint_path)
 
             wrapped_generator = GeneratorWrapper(model.generator)
 
