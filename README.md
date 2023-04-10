@@ -24,6 +24,7 @@ AI-SPARK-Challenge는 비지도 학습 방식을 사용하여 산업용 공기 �
 - AnoGAN (Anomaly Detection GAN)
 
 ## 프로젝트 구조
+```bash
 AI-SPARK-Challenge/
 │
 ├── data/ # 데이터셋 디렉토리
@@ -39,7 +40,7 @@ AI-SPARK-Challenge/
 ├── main.py # 메인 실행 스크립트
 │
 └── README.md # 프로젝트 설명 파일
-
+```
 ## 실행 방법
 1. repository를 복사합니다.
 ```bash
