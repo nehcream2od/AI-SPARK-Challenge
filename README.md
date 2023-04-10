@@ -44,7 +44,7 @@ AI-SPARK-Challenge/
 1. repository를 복사합니다.
 ```bash
 $ git clone https://github.com/nehcream2od/AI-SPARK-Challenge.git
-
+'''
 2. 실행에 필요한 패키지들을 install 합니다.
 ```bash
 $ pip install -r requirements.txt
