@@ -26,9 +26,7 @@ AI-SPARK-Challenge는 비지도 학습 방식을 사용하여 산업용 공기 �
 ## 프로젝트 구조
 AI-SPARK-Challenge/
 │
-
 ├── data/ # 데이터셋 디렉토리
-
 │
 
 ├── models/ # 모델 구현 파일 디렉토리
