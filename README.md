@@ -26,18 +26,31 @@ AI-SPARK-Challenge는 비지도 학습 방식을 사용하여 산업용 공기 �
 ## 프로젝트 구조
 AI-SPARK-Challenge/
 │
+
 ├── data/ # 데이터셋 디렉토리
+
 │
+
 ├── models/ # 모델 구현 파일 디렉토리
+
 │ ├── gan.py # GAN 모델 구현
+
 │ └── anogan.py # AnoGAN 모델 구현
+
 │
+
 ├── utils/ # 유틸리티 함수 디렉토리
+
 │ ├── preprocess.py # 전처리 관련 함수
+
 │ └── evaluation.py # 모델 평가 관련 함수
+
 │
+
 ├── main.py # 메인 실행 스크립트
+
 │
+
 └── README.md # 프로젝트 설명 파일
 
 ## 실행 방법
