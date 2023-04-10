@@ -16,6 +16,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from trainer.trainer import LitGANTrainer
 from model.model import GeneratorWrapper
+from itertools import chain
 
 # Fix random seeds for reproducibility
 SEED = 123
@@ -27,8 +28,8 @@ random.seed(SEED)
 os.environ["PYTHONHASHSEED"] = str(SEED)
 
 
-def ensemble_models(fold_results):
-    return np.mean(fold_results, axis=0)
+def flatten_batches(batches):
+    return np.concatenate([batch.numpy() for batch in batches], axis=0)
 
 
 def main(config):
@@ -39,41 +40,48 @@ def main(config):
 
     ensemble_results = []
 
-    for tp in range(len(data_module.train_datasets)):
-        # print(f"Processing equipment type {tp + 1}/{len(data_module.train_datasets)}")
-        tp_fold_results = []
-        train_loaders, val_loaders = data_module.train_val_dataloader()
+    # prepare data loaders
+    train_loaders, val_loaders = data_module.train_val_dataloader()
+    predict_loaders = data_module.predict_dataloader()
 
+    all_anomaly = []
+    for tp in range(len(train_loaders)):
+        tp_fold_results = []  # fold 별 예측 결과 -> 1개의 설비
+
+        threshold_mean_per_fold = []
+        mse_mean_per_fold = []
+
+        # fold 시작 fold 별로 train, validation하며 모델 학습, 결과를 뽑아내야함
         for fold, (train_loader, val_loader) in enumerate(
             zip(train_loaders[tp], val_loaders[tp])
         ):
-            # print(f"Fold {fold + 1}/{len(train_loaders[tp])}")
             input_size = train_loader.dataset[0].shape[0]
-            # print(train_loader.dataset[0].shape)
             output_size = input_size
 
             config["arch"]["args"]["input_size"] = input_size
             config["arch"]["args"]["output_size"] = output_size
 
-            # Build model architecture
+            # Build model
             model = config.init_obj("arch", module_arch)
 
-            # Compile model
+            # Compile
             torch.compile(model)
 
-            # Create a PyTorch Lightning trainer
+            # Create PyTorch Lightning trainer
             trainer = Trainer(
                 accelerator=config["trainer"]["accelerator"],
                 devices=config["trainer"]["devices"],
                 max_epochs=config["trainer"]["max_epochs"],
                 logger=WandbLogger(
-                    project="gan",
+                    project="AI-SPARK-Challenge",
                     name=config["name"],
                     config=config,
                     save_dir=config["trainer"]["save_dir"],
                 ),
-                log_every_n_steps=1,
+                log_every_n_steps=100,
             )
+
+            # Create Model trainer
             lit_gan_trainer = LitGANTrainer(
                 model=model,
                 criterion_gen=getattr(module_loss, config["criterion_gen"]),
@@ -101,23 +109,44 @@ def main(config):
                 val_dataloaders=val_loader,
             )
 
-            # (Optional) Save fold-specific model checkpoint
+            # Save fold-specific model checkpoint
             checkpoint_path = (
                 f"{config['trainer']['save_dir']}/type_{tp + 1}_fold_{fold + 1}.ckpt"
             )
             trainer.save_checkpoint(checkpoint_path)
 
-            # Evaluate the model on the prediction set
             wrapped_generator = GeneratorWrapper(model.generator)
-            predict_loaders = data_module.predict_dataloader()
-            tp_result = []
 
-            for tp_loader in predict_loaders[tp]:
-                result = trainer.predict(wrapped_generator, tp_loader)
-                tp_result.append(result)
-            tp_result = np.concatenate(tp_result, axis=0)
-            tp_fold_results.append(tp_result)
-        print(np.array(tp_fold_results).shape)
+            # Calculate the reconstruction error for the current fold
+            reconstructed = trainer.predict(wrapped_generator, train_loader)
+            reconstructed = flatten_batches(reconstructed)
+            train_data = flatten_batches(train_loader)
+            mse = np.mean(np.square(train_data - reconstructed), axis=1)
+
+            threshold_per_fold = np.percentile(mse, 95)  # 95% 이상이면 이상치라고 판단
+            threshold_mean_per_fold.append(threshold_per_fold)
+
+            # predict
+            reconstructed_test = trainer.predict(wrapped_generator, predict_loaders[tp])
+            reconstructed_test = flatten_batches(reconstructed_test)
+            test_data = flatten_batches(predict_loaders[tp])
+            mse_test = np.mean(np.square(test_data - reconstructed_test), axis=1)
+            mse_mean_per_fold.append(mse_test)
+
+        threshold_mean = np.mean(threshold_mean_per_fold)
+        mse_mean = np.mean(mse_mean_per_fold, axis=0)
+        anomaly = mse_mean > threshold_mean
+        all_anomaly.extend(anomaly)
+
+    # submission
+    sample = pd.read_csv("./data/answer_sample.csv")
+    sample["label"] = all_anomaly
+    error_len = sum(all_anomaly)
+    sample.to_csv(
+        f"./data/{config['name']}_err{error_len}.csv",
+        index=False,
+    )
+    print(sample["label"].value_counts())
 
 
 if __name__ == "__main__":

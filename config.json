@@ -67,7 +67,7 @@
     "trainer": {
         "accelerator": "cpu",
         "devices": 1,
-        "max_epochs": 1,
+        "max_epochs": 1000,
         "save_dir": "saved/"
     }
 }
