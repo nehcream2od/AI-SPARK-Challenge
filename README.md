@@ -26,7 +26,6 @@ AI-SPARK-Challenge는 비지도 학습 방식을 사용하여 산업용 공기 �
 ## 프로젝트 구조
 ```bash
 AI-SPARK-Challenge/
-├─ .DS_Stoe
 ├─ .gitignore
 ├─ README.md
 ├─ base
