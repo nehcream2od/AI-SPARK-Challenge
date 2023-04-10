@@ -73,7 +73,7 @@ def main(config):
             # set checkpoint
             path = f"{config['trainer']['save_dir']}/type_{tp}_fold_{fold + 1}"
             checkpoint_callback = ModelCheckpoint(
-                monitor="val_generator_loss",
+                monitor="val_mse",
                 mode="min",
                 save_top_k=1,
                 save_last=False,
@@ -83,7 +83,7 @@ def main(config):
 
             # set early stopping
             early_stop_callback = EarlyStopping(
-                monitor="val_generator_loss",
+                monitor="val_mse",
                 min_delta=0.00,
                 patience=100,
                 verbose=True,
@@ -152,9 +152,7 @@ def main(config):
 
             with torch.no_grad():
                 # Calculate the reconstruction error for the current fold
-                reconstructed = trainer.predict(
-                    wrapped_generator, train_loader
-                )
+                reconstructed = trainer.predict(wrapped_generator, train_loader)
             reconstructed = flatten_batches(reconstructed)
             train_data = flatten_batches(train_loader)
             mse = np.mean(np.square(train_data - reconstructed), axis=1)
