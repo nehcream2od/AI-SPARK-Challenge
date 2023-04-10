@@ -67,6 +67,7 @@ class CustomDataModule(BaseDataModule):
         self.prepare_data_per_node = prepare_data_per_node
         self.preprocess_fn = preprocess_fn
         self.kfold = kfold
+        self.save_hyperparameters()
 
     def prepare_data(self):
         self.train_df = pd.read_csv(self.data_dir + "/train.csv")

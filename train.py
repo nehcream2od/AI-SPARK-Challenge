@@ -84,17 +84,21 @@ def main(config):
                 mode="min",  # loss는 낮아야 좋음
             )
 
+            # logger
+            wandb_logger = WandbLogger(
+                project="AI-SPARK-Challenge",
+                name=config["name"],
+                config=config,
+                save_dir=config["trainer"]["save_dir"],
+                log_model="all",
+            )
+
             # Create PyTorch Lightning trainer
             trainer = Trainer(
                 accelerator=config["trainer"]["accelerator"],
                 devices=config["trainer"]["devices"],
                 max_epochs=config["trainer"]["max_epochs"],
-                logger=WandbLogger(
-                    project="AI-SPARK-Challenge",
-                    name=config["name"],
-                    config=config,
-                    save_dir=config["trainer"]["save_dir"],
-                ),
+                logger=wandb_logger,
                 log_every_n_steps=100,
                 callbacks=[checkpoint_callback, early_stop_callback],
             )
@@ -151,8 +155,7 @@ def main(config):
         threshold_mean = np.mean(threshold_mean_per_fold)
         mse_mean = np.mean(mse_mean_per_fold, axis=0)
         anomaly = mse_mean > threshold_mean
-        print(len(anomaly), sum(anomaly), "--------------------------------")
-        # all_anomaly.extend(anomaly)
+        all_anomaly.extend(anomaly)
 
     # submission
     sample = pd.read_csv("./data/answer_sample.csv")
