@@ -1,4 +1,5 @@
 import torch
+import torchmetrics
 from base import BaseLitModule
 
 
@@ -10,21 +11,26 @@ class LitGANTrainer(BaseLitModule):
         criterion_disc,
         gen_optimizer_class,
         disc_optimizer_class,
+        gen_lr,
+        disc_lr,
         config,
         alpha,
     ):
         super().__init__()
+        self.config = config
         self.generator = model.generator
         self.discriminator = model.discriminator
         self.criterion_gen = criterion_gen
         self.criterion_disc = criterion_disc
         self.gen_optimizer_class = gen_optimizer_class
         self.disc_optimizer_class = disc_optimizer_class
-        self.config = config
+        self.gen_lr = gen_lr
+        self.disc_lr = disc_lr
         self.alpha = alpha
         self.automatic_optimization = False
         self.training_ouputs = []
         self.validation_outputs = []
+        self.valid_mse = torchmetrics.MeanSquaredError()
 
     def forward(self, x):
         return self.generator(x)
@@ -84,6 +90,7 @@ class LitGANTrainer(BaseLitModule):
         self.validation_outputs.append(
             {"val_discriminator_loss": disc_loss, "val_generator_loss": gen_loss}
         )
+        self.valid_mse.update(self(inputs), inputs)
 
     def on_validation_epoch_start(self):
         self.validation_outputs = []
@@ -98,13 +105,14 @@ class LitGANTrainer(BaseLitModule):
 
         self.log("val_discriminator_loss", avg_disc_loss, on_epoch=True, prog_bar=True)
         self.log("val_generator_loss", avg_gen_loss, on_epoch=True, prog_bar=True)
+        self.log("val_mse", self.valid_mse.compute(), on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
         optimizer_g = self.gen_optimizer_class(
-            self.generator.parameters(), **self.config["gen_optimizer"]["args"]
+            self.generator.parameters(), lr=self.gen_lr
         )
         optimizer_d = self.disc_optimizer_class(
-            self.discriminator.parameters(), **self.config["disc_optimizer"]["args"]
+            self.discriminator.parameters(), lr=self.disc_lr
         )
 
         return [optimizer_g, optimizer_d]

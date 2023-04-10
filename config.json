@@ -50,7 +50,7 @@
         }
     },
     "gen_optimizer": {
-        "type": "Lion",
+        "type": "Adam",
         "args": {
             "lr": 0.001
         }

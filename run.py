@@ -2,6 +2,7 @@ import argparse
 import collections
 import os
 import random
+import sys
 
 import data_module.data_module as module_data
 import model.loss as module_loss
@@ -11,13 +12,14 @@ import numpy as np
 import pandas as pd
 import torch
 from data_module.data_module import CustomDataModule
+from lightning.pytorch.tuner import Tuner
 from model.model import GeneratorWrapper
 from parse_config import ConfigParser
 from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from trainer.trainer import LitGANTrainer
 from utils import flatten_batches
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 # Fix random seeds for reproducibility
 SEED = 123
@@ -27,6 +29,9 @@ torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 random.seed(SEED)
 os.environ["PYTHONHASHSEED"] = str(SEED)
+
+# 현재 폴더 모듈 경로 추가
+sys.path.append(os.path.abspath("."))
 
 
 def main(config):
@@ -120,6 +125,8 @@ def main(config):
                     else torch.optim,
                     config["disc_optimizer"]["type"],
                 ),
+                gen_lr=config["gen_optimizer"]["args"]["lr"],
+                disc_lr=config["disc_optimizer"]["args"]["lr"],
                 config=config,
                 alpha=config["alpha"],
             )
@@ -133,8 +140,9 @@ def main(config):
 
             wrapped_generator = GeneratorWrapper(model.generator)
 
-            # Calculate the reconstruction error for the current fold
-            reconstructed = trainer.predict(wrapped_generator, train_loader)
+            with torch.no_grad():
+                # Calculate the reconstruction error for the current fold
+                reconstructed = trainer.predict(wrapped_generator, train_loader)
             reconstructed = flatten_batches(reconstructed)
             train_data = flatten_batches(train_loader)
             mse = np.mean(np.square(train_data - reconstructed), axis=1)
