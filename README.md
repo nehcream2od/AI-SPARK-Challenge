@@ -20,24 +20,35 @@ AI-SPARK-Challenge는 비지도 학습 방식을 사용하여 산업용 공기 �
 
 - Python
 - PyTorch
+- Pytorch Lightning
 - GAN (Generative Adversarial Network)
-- AnoGAN (Anomaly Detection GAN)
 
 ## 프로젝트 구조
 ```bash
 AI-SPARK-Challenge/
 │
-├── data/ # 데이터셋 디렉토리
+├── base/ # base 파일들의 디렉토리
 │
-├── models/ # 모델 구현 파일 디렉토리
-│ ├── gan.py # GAN 모델 구현
-│ └── anogan.py # AnoGAN 모델 구현
+├── datasets/ # torch dataset을 만드는 파일 디렉토리
+│ └── dataset.py # dataset 함수
+│
+├── data_module/ # dataloader, 전처리 관련 디렉토리
+│ ├── data_module.py # dataloader, 전처리 적용 함수 파일
+│ └── scaler.py # 스케일러 함수 파일
+│
+├── model/ # 모델 관련 디렉토리
+│ ├── model.py # 모델 구현 파일
+│ ├── loss.py # loss function 파일
+│ ├── scheduler.py # scheduler 파일
+│ └── optimizer.py # 옵티마이저 함수 파일
+│
+├── trainer/ # torch lightning trainer 디렉토리
+│ └── trainer.py # trainer 구현 파일, forward, backward 과정 
 │
 ├── utils/ # 유틸리티 함수 디렉토리
-│ ├── preprocess.py # 전처리 관련 함수
-│ └── evaluation.py # 모델 평가 관련 함수
+│ └── util.py # 유틸리티 함수 파일 
 │
-├── main.py # 메인 실행 스크립트
+├── util.py # 메인 실행 스크립트
 │
 └── README.md # 프로젝트 설명 파일
 ```
