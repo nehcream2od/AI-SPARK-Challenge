@@ -52,13 +52,13 @@
     "gen_optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 0.001
+            "lr": 0.0003
         }
     },
     "disc_optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 0.001
+            "lr": 0.0003
         }
     },
     "criterion_gen": "mean_squared_error",
@@ -68,7 +68,7 @@
     "trainer": {
         "accelerator": "cpu",
         "devices": 1,
-        "max_epochs": 10,
+        "max_epochs": 1000,
         "save_dir": "saved/"
     }
 }

@@ -72,7 +72,7 @@ def main(config):
 
             # set checkpoint
             checkpoint_callback = ModelCheckpoint(
-                monitor="val_generator_loss",
+                monitor="val_mse",
                 mode="min",
                 save_top_k=1,
                 save_last=False,
@@ -82,7 +82,7 @@ def main(config):
 
             # set early stopping
             early_stop_callback = EarlyStopping(
-                monitor="val_generator_loss",
+                monitor="val_mse",
                 min_delta=0.00,
                 patience=100,
                 verbose=True,
@@ -149,7 +149,7 @@ def main(config):
 
             threshold_per_fold = np.percentile(
                 mse, config["threshold"] * 100
-            )  # 95% 이상이면 이상치라고 판단
+            )  # 이상치 판단 기준 * 100
             # threshold_per_fold = np.max(mse)
             threshold_mean_per_fold.append(threshold_per_fold)
 
