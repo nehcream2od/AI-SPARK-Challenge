@@ -11,12 +11,12 @@ import numpy as np
 import pandas as pd
 import torch
 from data_module.data_module import CustomDataModule
+from model.model import GeneratorWrapper
 from parse_config import ConfigParser
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from trainer.trainer import LitGANTrainer
-from model.model import GeneratorWrapper
-from itertools import chain
+from utils import flatten_batches
 
 # Fix random seeds for reproducibility
 SEED = 123
@@ -26,10 +26,6 @@ torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 random.seed(SEED)
 os.environ["PYTHONHASHSEED"] = str(SEED)
-
-
-def flatten_batches(batches):
-    return np.concatenate([batch.numpy() for batch in batches], axis=0)
 
 
 def main(config):
@@ -123,7 +119,10 @@ def main(config):
             train_data = flatten_batches(train_loader)
             mse = np.mean(np.square(train_data - reconstructed), axis=1)
 
-            threshold_per_fold = np.percentile(mse, 95)  # 95% 이상이면 이상치라고 판단
+            threshold_per_fold = np.percentile(
+                mse, config["threshold"] * 100
+            )  # 95% 이상이면 이상치라고 판단
+            # threshold_per_fold = np.max(mse)
             threshold_mean_per_fold.append(threshold_per_fold)
 
             # predict
@@ -136,7 +135,8 @@ def main(config):
         threshold_mean = np.mean(threshold_mean_per_fold)
         mse_mean = np.mean(mse_mean_per_fold, axis=0)
         anomaly = mse_mean > threshold_mean
-        all_anomaly.extend(anomaly)
+        print(len(anomaly), sum(anomaly), "--------------------------------")
+        # all_anomaly.extend(anomaly)
 
     # submission
     sample = pd.read_csv("./data/answer_sample.csv")

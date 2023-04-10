@@ -64,10 +64,11 @@
     "criterion_gen": "mean_squared_error",
     "criterion_disc": "binary_cross_entropy_with_logits",
     "alpha": 0.5,
+    "threshold": 0.95,
     "trainer": {
         "accelerator": "cpu",
         "devices": 1,
-        "max_epochs": 1000,
+        "max_epochs": 10,
         "save_dir": "saved/"
     }
 }

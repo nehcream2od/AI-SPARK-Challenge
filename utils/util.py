@@ -1,9 +1,11 @@
 import json
-import torch
-import pandas as pd
-from pathlib import Path
-from itertools import repeat
 from collections import OrderedDict
+from itertools import repeat
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import torch
 
 
 def ensure_dir(dirname):
@@ -28,3 +30,7 @@ def inf_loop(data_loader):
     """wrapper function for endless data loader."""
     for loader in repeat(data_loader):
         yield from loader
+
+
+def flatten_batches(batches):
+    return np.concatenate([batch.numpy() for batch in batches], axis=0)
