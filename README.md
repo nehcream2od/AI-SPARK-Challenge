@@ -49,11 +49,7 @@ AI-SPARK-Challenge/
 │  └─ scheduler.py
 ├─ parse_config.py
 ├─ requirements.txt
-├─ test.py
-├─ train.py
-├─ trainer
-│  ├─ __init__.py
-│  └─ trainer.py
+├─ run.py
 └─ utils
    ├─ __init__.py
    └─ util.py
