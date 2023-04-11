@@ -50,7 +50,7 @@
         }
     },
     "gen_optimizer": {
-        "type": "Adam",
+        "type": "Lion",
         "args": {
             "lr": 0.000001
         }
@@ -66,9 +66,9 @@
         "args": {
             "T_0": 100,
             "T_mult": 2,
-            "eta_max": 0.003,
+            "eta_max": 0.001,
             "T_up": 10,
-            "gamma": 0.9
+            "gamma": 0.5
         }
     },
     "disc_scheduler": {
@@ -78,17 +78,17 @@
             "T_mult": 2,
             "eta_max": 0.003,
             "T_up": 10,
-            "gamma": 0.9
+            "gamma": 0.5
         }
     },
     "criterion_gen": "mean_squared_error",
     "criterion_disc": "binary_cross_entropy_with_logits",
-    "alpha": 0.9,
-    "threshold": 0.7,
+    "alpha": 0.7,
+    "threshold": 0.99,
     "trainer": {
         "accelerator": "cpu",
         "devices": 1,
-        "max_epochs": 1000,
+        "max_epochs": 100,
         "save_dir": "saved/"
     }
 }

@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from base import BaseModel
+from base import BaseLitModel
 
 
 class Generator(nn.Module):
@@ -64,14 +64,14 @@ class Discriminator(nn.Module):
                 nn.init.kaiming_normal_(layer.weight)
 
 
-class GANModel(BaseModel):
+class GANModel(BaseLitModel):
     def __init__(self, input_size, output_size, gen_hidden_size, dsc_hidden_size):
         super(GANModel, self).__init__()
         self.generator = Generator(input_size, gen_hidden_size, output_size)
         self.discriminator = Discriminator(output_size, dsc_hidden_size, 1)
 
 
-class GeneratorWrapper(BaseModel):
+class GeneratorWrapper(BaseLitModel):
     def __init__(self, generator):
         super().__init__()
         self.generator = generator

@@ -1,10 +1,10 @@
 import torch
 import torchmetrics
-from base import BaseLitModule
+from base import BaseLitModel
 from model.scheduler import CosineAnnealingWarmUpRestarts
 
 
-class LitGANTrainer(BaseLitModule):
+class LitGANTrainer(BaseLitModel):
     def __init__(
         self,
         model,
@@ -84,7 +84,6 @@ class LitGANTrainer(BaseLitModule):
 
     def validation_step(self, batch, batch_idx):
         inputs = batch
-        batch_size = inputs.size(0)
 
         with torch.no_grad():
             generated_inputs = self.generator(inputs)

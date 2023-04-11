@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 import torch.nn as nn
 
 
-class BaseModel(pl.LightningModule):
+class BaseLitModel(pl.LightningModule):
     """
     Base class for all models
     """
@@ -26,3 +26,15 @@ class BaseModel(pl.LightningModule):
         model_parameters = filter(lambda p: p.requires_grad, self.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])
         return super().__str__() + "\nTrainable parameters: {}".format(params)
+
+    def training_step(self, batch, batch_idx):
+        # Implement your training loop logic here
+        raise NotImplementedError
+
+    def validation_step(self, batch, batch_idx):
+        # Implement your validation loop logic here
+        raise NotImplementedError
+
+    def configure_optimizers(self):
+        # Implement your optimizer logic here
+        raise NotImplementedError

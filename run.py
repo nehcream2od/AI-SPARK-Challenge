@@ -40,24 +40,29 @@ def main(config):
     data_module.prepare_data()
     data_module.setup()
 
-    ensemble_results = []
-
     # prepare data loaders
     train_loaders, val_loaders = data_module.train_val_dataloader()
     predict_loaders = data_module.predict_dataloader()
 
-    all_anomaly = []
+    ensemble_results = []
 
     for tp in range(len(train_loaders)):
-        tp_fold_results = []  # fold 별 예측 결과 -> 1개의 설비
-
-        threshold_mean_per_fold = []
-        mse_mean_per_fold = []
+        anomaly_per_fold = []
 
         # fold 시작 fold 별로 train, validation하며 모델 학습, 결과를 뽑아내야함
         for fold, (train_loader, val_loader) in enumerate(
             zip(train_loaders[tp], val_loaders[tp])
         ):
+            # 변수 초기화
+            if globals().get("model"):
+                del model
+            if globals().get("trainer"):
+                del trainer
+            if globals().get("lit_gan_trainer"):
+                del lit_gan_trainer
+            if globals().get("wrapped_generator"):
+                del wrapped_generator
+
             input_size = train_loader.dataset[0].shape[0]
             output_size = input_size
 
@@ -105,8 +110,9 @@ def main(config):
                 devices=config["trainer"]["devices"],
                 max_epochs=config["trainer"]["max_epochs"],
                 logger=wandb_logger,
-                log_every_n_steps=100,
+                log_every_n_steps=1000,
                 callbacks=[checkpoint_callback, early_stop_callback],
+                detect_anomaly=True,
             )
 
             # Create Model trainer
@@ -161,33 +167,30 @@ def main(config):
                 mse, config["threshold"] * 100
             )  # 이상치 판단 기준 * 100
             # threshold_per_fold = np.max(mse)
-            threshold_mean_per_fold.append(threshold_per_fold)
 
             # predict
-            reconstructed_test = trainer.predict(wrapped_generator, predict_loaders[tp])
+            with torch.no_grad():
+                reconstructed_test = trainer.predict(
+                    wrapped_generator, predict_loaders[tp]
+                )
             reconstructed_test = flatten_batches(reconstructed_test)
             test_data = flatten_batches(predict_loaders[tp])
             mse_test = np.mean(np.square(test_data - reconstructed_test), axis=1)
-            mse_mean_per_fold.append(mse_test)
 
-        threshold_mean = np.mean(threshold_mean_per_fold)
+            # labeling
+            anomaly = np.where(mse_test > threshold_per_fold, 1, 0)
+            anomaly_per_fold.append(anomaly)
 
-        # Calculate binary predictions for each fold
-        binary_preds_per_fold = [
-            np.where(mse > threshold_mean, 1, 0) for mse in mse_mean_per_fold
-        ]
-
-        # Apply hard voting
-        hard_voting_preds = np.sum(binary_preds_per_fold, axis=0)
-        majority_vote = 3
-        final_preds = np.where(hard_voting_preds > majority_vote, 1, 0)
-
-        all_anomaly.extend(final_preds)
+        fold_ensemble = np.sum(anomaly_per_fold, axis=0)
+        majority_vote = 1
+        anomaly = np.where(fold_ensemble >= majority_vote, 1, 0)
+        print(fold_ensemble)
+        ensemble_results.extend(anomaly)
 
     # submission
     sample = pd.read_csv("./data/answer_sample.csv")
-    sample["label"] = all_anomaly
-    error_len = sum(all_anomaly)
+    sample["label"] = ensemble_results
+    error_len = sum(ensemble_results)
     sample.to_csv(
         f"./data/{config['name']}_err{error_len}.csv",
         index=False,
