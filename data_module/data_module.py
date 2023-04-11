@@ -94,24 +94,21 @@ class CustomDataModule(BaseDataModule):
             self.predict_datasets.append(CustomPredictDataset(predict_subset))
 
     def _apply_preprocessing(self, train_subset, predict_subset):
-        if self.preprocess_fn.get("scaler"):
+        preprocess_fn = self.preprocess_fn
+
+        if preprocess_fn.get("scaler"):
             train_subset, predict_subset = apply_scaler(
-                train_subset,
-                predict_subset,
-                self.preprocess_fn["scaler"],
+                train_subset, predict_subset, preprocess_fn["scaler"]
             )
+
         if (
-            self.preprocess_fn.get("fourier_transform")
-            and self.preprocess_fn["fourier_transform"]["apply"]
+            preprocess_fn.get("fourier_transform")
+            and preprocess_fn["fourier_transform"]["apply"]
         ):
-            train_subset = apply_fourier_transform(
-                train_subset,
-                self.preprocess_fn["fourier_transform"]["features"],
-            )
-            predict_subset = apply_fourier_transform(
-                predict_subset,
-                self.preprocess_fn["fourier_transform"]["features"],
-            )
+            ft_features = preprocess_fn["fourier_transform"]["features"]
+            train_subset = apply_fourier_transform(train_subset, ft_features)
+            predict_subset = apply_fourier_transform(predict_subset, ft_features)
+
         return train_subset, predict_subset
 
     def train_val_dataloader(self):

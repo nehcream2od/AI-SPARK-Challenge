@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 import torch
 from data_module.data_module import CustomDataModule
-from lightning.pytorch.tuner import Tuner
 from model.model import GeneratorWrapper, LitGANModel
 from parse_config import ConfigParser
 from pytorch_lightning import Trainer
@@ -62,6 +61,38 @@ def main(config):
             if globals().get("wrapped_generator"):
                 del wrapped_generator
 
+            # Create Model
+            """config 통해서 모델 초기화 할 때 참고
+            model = config.init_obj("arch", module_arch)"""
+
+            lit_gan = LitGANModel(
+                input_size=train_loader.dataset[0].shape[0],
+                output_size=train_loader.dataset[0].shape[0],
+                gen_hidden_size=config["arch"]["args"]["gen_hidden_size"],
+                disc_hidden_size=config["arch"]["args"]["disc_hidden_size"],
+                criterion_gen=getattr(module_loss, config["criterion_gen"]),
+                criterion_disc=getattr(module_loss, config["criterion_disc"]),
+                gen_optimizer_class=getattr(
+                    module_optimizer
+                    if config["gen_optimizer"]["type"] == "Lion"
+                    else torch.optim,
+                    config["gen_optimizer"]["type"],
+                ),
+                disc_optimizer_class=getattr(
+                    module_optimizer
+                    if config["disc_optimizer"]["type"] == "Lion"
+                    else torch.optim,
+                    config["disc_optimizer"]["type"],
+                ),
+                gen_lr=config["gen_optimizer"]["args"]["lr"],
+                disc_lr=config["disc_optimizer"]["args"]["lr"],
+                config=config,
+                alpha=config["alpha"],
+            )
+
+            # compile
+            torch.compile(lit_gan)
+
             # set checkpoint
             path = f"{config['trainer']['save_dir']}/type_{tp}_fold_{fold + 1}"
             checkpoint_callback = ModelCheckpoint(
@@ -102,41 +133,6 @@ def main(config):
                 detect_anomaly=True,
             )
 
-            # Create Model
-            input_size = train_loader.dataset[0].shape[0]
-            output_size = input_size
-
-            # config 통해서 모델 초기화 할 때 참고
-            # model = config.init_obj("arch", module_arch)
-
-            lit_gan = LitGANModel(
-                input_size=input_size,
-                output_size=output_size,
-                gen_hidden_size=config["arch"]["args"]["gen_hidden_size"],
-                disc_hidden_size=config["arch"]["args"]["disc_hidden_size"],
-                criterion_gen=getattr(module_loss, config["criterion_gen"]),
-                criterion_disc=getattr(module_loss, config["criterion_disc"]),
-                gen_optimizer_class=getattr(
-                    module_optimizer
-                    if config["gen_optimizer"]["type"] == "Lion"
-                    else torch.optim,
-                    config["gen_optimizer"]["type"],
-                ),
-                disc_optimizer_class=getattr(
-                    module_optimizer
-                    if config["disc_optimizer"]["type"] == "Lion"
-                    else torch.optim,
-                    config["disc_optimizer"]["type"],
-                ),
-                gen_lr=config["gen_optimizer"]["args"]["lr"],
-                disc_lr=config["disc_optimizer"]["args"]["lr"],
-                config=config,
-                alpha=config["alpha"],
-            )
-
-            # compile
-            torch.compile(lit_gan)
-
             # Train on the current fold
             trainer.fit(
                 lit_gan,
@@ -155,8 +151,8 @@ def main(config):
 
             wrapped_generator = GeneratorWrapper(lit_gan.generator)
 
+            # Calculate the reconstruction error for the current fold
             with torch.no_grad():
-                # Calculate the reconstruction error for the current fold
                 reconstructed = trainer.predict(wrapped_generator, train_loader)
             reconstructed = flatten_batches(reconstructed)
             train_data = flatten_batches(train_loader)
