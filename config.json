@@ -1,7 +1,7 @@
 {
-    "name": "AI-SPARK-Challenge GANModel",
+    "name": "AI-SPARK-Challenge LitGANModel",
     "arch": {
-        "type": "GANModel",
+        "type": "LitGANModel",
         "args": {
             "input_size": null,
             "output_size": null,
@@ -9,7 +9,7 @@
                 16,
                 8
             ],
-            "dsc_hidden_size": [
+            "disc_hidden_size": [
                 8
             ]
         }

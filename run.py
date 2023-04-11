@@ -13,12 +13,11 @@ import pandas as pd
 import torch
 from data_module.data_module import CustomDataModule
 from lightning.pytorch.tuner import Tuner
-from model.model import GeneratorWrapper
+from model.model import GeneratorWrapper, LitGANModel
 from parse_config import ConfigParser
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
-from trainer.trainer import LitGANTrainer
 from utils import flatten_batches
 
 # Fix random seeds for reproducibility
@@ -58,22 +57,10 @@ def main(config):
                 del model
             if globals().get("trainer"):
                 del trainer
-            if globals().get("lit_gan_trainer"):
+            if globals().get("lit_gan"):
                 del lit_gan_trainer
             if globals().get("wrapped_generator"):
                 del wrapped_generator
-
-            input_size = train_loader.dataset[0].shape[0]
-            output_size = input_size
-
-            config["arch"]["args"]["input_size"] = input_size
-            config["arch"]["args"]["output_size"] = output_size
-
-            # Build model
-            model = config.init_obj("arch", module_arch)
-
-            # Compile
-            torch.compile(model)
 
             # set checkpoint
             path = f"{config['trainer']['save_dir']}/type_{tp}_fold_{fold + 1}"
@@ -115,9 +102,18 @@ def main(config):
                 detect_anomaly=True,
             )
 
-            # Create Model trainer
-            lit_gan_trainer = LitGANTrainer(
-                model=model,
+            # Create Model
+            input_size = train_loader.dataset[0].shape[0]
+            output_size = input_size
+
+            # config 통해서 모델 초기화 할 때 참고
+            # model = config.init_obj("arch", module_arch)
+
+            lit_gan = LitGANModel(
+                input_size=input_size,
+                output_size=output_size,
+                gen_hidden_size=config["arch"]["args"]["gen_hidden_size"],
+                disc_hidden_size=config["arch"]["args"]["disc_hidden_size"],
                 criterion_gen=getattr(module_loss, config["criterion_gen"]),
                 criterion_disc=getattr(module_loss, config["criterion_disc"]),
                 gen_optimizer_class=getattr(
@@ -138,9 +134,12 @@ def main(config):
                 alpha=config["alpha"],
             )
 
+            # compile
+            torch.compile(lit_gan)
+
             # Train on the current fold
             trainer.fit(
-                lit_gan_trainer,
+                lit_gan,
                 train_dataloaders=train_loader,
                 val_dataloaders=val_loader,
             )
@@ -148,13 +147,13 @@ def main(config):
             # load best model
             wandb_save_dir = wandb_logger.save_dir
             run_id = wandb_logger.experiment.id
-            model.load_state_dict(
+            lit_gan.load_state_dict(
                 torch.load(
                     f"./{wandb_save_dir}AI-SPARK-Challenge/{run_id}/checkpoints/saved/type_{tp}_fold_{fold + 1}.ckpt"
                 )["state_dict"]
             )
 
-            wrapped_generator = GeneratorWrapper(model.generator)
+            wrapped_generator = GeneratorWrapper(lit_gan.generator)
 
             with torch.no_grad():
                 # Calculate the reconstruction error for the current fold
