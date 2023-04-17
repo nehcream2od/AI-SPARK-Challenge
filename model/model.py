@@ -127,6 +127,7 @@ class LitGANModel(BaseLitModel):
         self.training_outputs.append(
             {"train_discriminator_loss": d_loss, "train_generator_loss": g_loss}
         )
+        # return {"train_discriminator_loss": d_loss, "train_generator_loss": g_loss}
 
     def on_train_epoch_start(self):
         self.training_outputs = []

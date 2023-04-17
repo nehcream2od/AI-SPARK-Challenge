@@ -19,8 +19,8 @@
         "type": "CustomDataModule",
         "args": {
             "data_dir": "./data",
-            "batch_size": 32,
-            "shuffle": true,
+            "batch_size": 64,
+            "shuffle": false,
             "num_workers": 0,
             "prepare_data_per_node": true,
             "preprocess_fn": {
@@ -50,7 +50,7 @@
         }
     },
     "gen_optimizer": {
-        "type": "Adam",
+        "type": "Lion",
         "args": {
             "lr": 0.000001
         }
@@ -66,7 +66,7 @@
         "args": {
             "T_0": 100,
             "T_mult": 2,
-            "eta_max": 0.01,
+            "eta_max": 0.03,
             "T_up": 10,
             "gamma": 0.5
         }
@@ -76,7 +76,7 @@
         "args": {
             "T_0": 100,
             "T_mult": 2,
-            "eta_max": 0.01,
+            "eta_max": 0.001,
             "T_up": 10,
             "gamma": 0.5
         }
@@ -84,11 +84,11 @@
     "criterion_gen": "mean_squared_error",
     "criterion_disc": "binary_cross_entropy_with_logits",
     "alpha": 0.7,
-    "threshold": 0.99,
+    "threshold": 1,
     "trainer": {
         "accelerator": "cpu",
         "devices": 1,
-        "max_epochs": 500,
+        "max_epochs": 3000,
         "save_dir": "saved/"
     }
 }

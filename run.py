@@ -15,7 +15,7 @@ from data_module.data_module import CustomDataModule
 from model.model import GeneratorWrapper, LitGANModel
 from parse_config import ConfigParser
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichProgressBar
 from pytorch_lightning.loggers import WandbLogger
 from utils import flatten_batches
 
@@ -129,7 +129,7 @@ def main(config):
                 max_epochs=config["trainer"]["max_epochs"],
                 logger=wandb_logger,
                 log_every_n_steps=1000,
-                callbacks=[checkpoint_callback, early_stop_callback],
+                callbacks=[checkpoint_callback, early_stop_callback, RichProgressBar()],
                 detect_anomaly=True,
             )
 
@@ -153,7 +153,9 @@ def main(config):
 
             # Calculate the reconstruction error for the current fold
             with torch.no_grad():
-                reconstructed = trainer.predict(wrapped_generator, train_loader)
+                reconstructed = trainer.predict(
+                    wrapped_generator, train_loader, ckpt_path="best"
+                )
             reconstructed = flatten_batches(reconstructed)
             train_data = flatten_batches(train_loader)
             mse = np.mean(np.square(train_data - reconstructed), axis=1)
@@ -166,7 +168,7 @@ def main(config):
             # predict
             with torch.no_grad():
                 reconstructed_test = trainer.predict(
-                    wrapped_generator, predict_loaders[tp]
+                    wrapped_generator, predict_loaders[tp], ckpt_path="best"
                 )
             reconstructed_test = flatten_batches(reconstructed_test)
             test_data = flatten_batches(predict_loaders[tp])
@@ -177,7 +179,7 @@ def main(config):
             anomaly_per_fold.append(anomaly)
 
         fold_ensemble = np.sum(anomaly_per_fold, axis=0)
-        majority_vote = 1
+        majority_vote = 3
         anomaly = np.where(fold_ensemble >= majority_vote, 1, 0)
         print(fold_ensemble)
         ensemble_results.extend(anomaly)

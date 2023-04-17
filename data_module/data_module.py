@@ -134,7 +134,7 @@ class CustomDataModule(BaseDataModule):
                     DataLoader(
                         train_dataset,
                         batch_size=self.batch_size,
-                        sampler=SubsetRandomSampler(train_idx),
+                        shuffle=self.shuffle,
                         num_workers=self.num_workers,
                     )
                     for train_idx in train_indices
@@ -145,7 +145,7 @@ class CustomDataModule(BaseDataModule):
                     DataLoader(
                         train_dataset,
                         batch_size=self.batch_size,
-                        sampler=SubsetRandomSampler(val_idx),
+                        shuffle=self.shuffle,
                         num_workers=self.num_workers,
                     )
                     for val_idx in val_indices
