@@ -34,6 +34,7 @@ class BaseDataModule(pl.LightningDataModule):
     def setup(self, stage=None):
         if stage == "fit" or stage is None:
             self.train_dataset = TrainDataset(self.train_df)
+            
         elif stage == "predict":
             self.predict_dataset = PredictDataset(self.predict_df)
 

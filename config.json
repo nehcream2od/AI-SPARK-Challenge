@@ -50,15 +50,15 @@
         }
     },
     "gen_optimizer": {
-        "type": "Lion",
+        "type": "Adam",
         "args": {
-            "lr": 0.000001
+            "lr": 0.00001
         }
     },
     "disc_optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 0.000001
+            "lr": 0.00001
         }
     },
     "gen_scheduler": {
@@ -66,9 +66,9 @@
         "args": {
             "T_0": 100,
             "T_mult": 2,
-            "eta_max": 0.03,
+            "eta_max": 0.003,
             "T_up": 10,
-            "gamma": 0.5
+            "gamma": 0.9
         }
     },
     "disc_scheduler": {
@@ -76,9 +76,9 @@
         "args": {
             "T_0": 100,
             "T_mult": 2,
-            "eta_max": 0.001,
+            "eta_max": 0.003,
             "T_up": 10,
-            "gamma": 0.5
+            "gamma": 0.9
         }
     },
     "criterion_gen": "mean_squared_error",

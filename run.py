@@ -154,7 +154,8 @@ def main(config):
             # Calculate the reconstruction error for the current fold
             with torch.no_grad():
                 reconstructed = trainer.predict(
-                    wrapped_generator, train_loader, ckpt_path="best"
+                    wrapped_generator,
+                    train_loader,
                 )
             reconstructed = flatten_batches(reconstructed)
             train_data = flatten_batches(train_loader)
@@ -168,7 +169,8 @@ def main(config):
             # predict
             with torch.no_grad():
                 reconstructed_test = trainer.predict(
-                    wrapped_generator, predict_loaders[tp], ckpt_path="best"
+                    wrapped_generator,
+                    predict_loaders[tp],
                 )
             reconstructed_test = flatten_batches(reconstructed_test)
             test_data = flatten_batches(predict_loaders[tp])
